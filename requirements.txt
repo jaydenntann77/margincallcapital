@@ -3,6 +3,7 @@ python-dotenv
 requests
 numpy
 pandas
+scipy
 
 # Research DB (also used for live)
 duckdb>=0.10

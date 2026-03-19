@@ -1,0 +1,9 @@
+,column_name,column_type,null,key,default,extra
+0,ts,TIMESTAMP,YES,,,
+1,open,DOUBLE,YES,,,
+2,high,DOUBLE,YES,,,
+3,low,DOUBLE,YES,,,
+4,close,DOUBLE,YES,,,
+5,volume,DOUBLE,YES,,,
+6,symbol,VARCHAR,YES,,,
+7,interval,VARCHAR,YES,,,

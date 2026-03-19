@@ -1,0 +1,6 @@
+,cluster_descriptor
+0,"low-vol, thin-tail, high-beta, pos-mom"
+1,"high-vol, fat-tail, high-beta, neg-mom"
+2,"high-vol, fat-tail, low-beta, neg-mom"
+3,"high-vol, fat-tail, low-beta, pos-mom"
+4,"low-vol, thin-tail, low-beta, pos-mom"

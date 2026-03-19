@@ -1,12 +1,8 @@
+.env
+.DS_Store
+.venv/
+.venv-research/
 __pycache__/
 *.pyc
-.env
-.vscode/
-logs/
-.venv/
-data/*.duckdb
-data/*.duckdb.wal/
-data/*.png
-*.egg-info/
+*.pyo
 .ipynb_checkpoints/
-.DS_Store

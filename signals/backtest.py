@@ -135,7 +135,9 @@ class VectorizedBacktester:
     def __init__(self, prices: pd.DataFrame, weights: pd.DataFrame, 
                  benchmark_prices: pd.Series = None,
                  fee_rate: float = 0.0005, initial_capital: float = 10000.0, 
-                 periods_per_year: int = 8760):
+                 periods_per_year: int = 8760,
+                 start_date: str = None, 
+                 end_date: str = None):
         """Initialize the backtester.
 
         Args:
@@ -146,15 +148,30 @@ class VectorizedBacktester:
             fee_rate: Proportional cost per unit turnover per bar.
             initial_capital: Starting capital for equity curve simulation.
             periods_per_year: Annualization factor for risk metrics.
+            start_date: Optional start date string (e.g., '2022-01-01') to slice data.
+            end_date: Optional end date string (e.g., '2023-01-01') to slice data.
         """
         
-        # Align indexes to ensure no shape mismatches
+        # 1. Slice the data by date BEFORE alignment to optimize memory
+        if start_date is not None:
+            prices = prices.loc[start_date:]
+            weights = weights.loc[start_date:]
+            if benchmark_prices is not None:
+                benchmark_prices = benchmark_prices.loc[start_date:]
+                
+        if end_date is not None:
+            prices = prices.loc[:end_date]
+            weights = weights.loc[:end_date]
+            if benchmark_prices is not None:
+                benchmark_prices = benchmark_prices.loc[:end_date]
+
+        # 2. Align indexes to ensure no shape mismatches
         self.prices, self.weights = prices.align(weights, join='inner')
         self.fee_rate = fee_rate
         self.initial_capital = initial_capital
         self.periods_per_year = periods_per_year
         
-        # Handle the benchmark
+        # 3. Handle the benchmark
         if benchmark_prices is not None:
             # Reindex benchmark to match the exact timestamps of our strategy
             self.benchmark_prices = benchmark_prices.reindex(self.prices.index).ffill()
@@ -163,6 +180,9 @@ class VectorizedBacktester:
             
         self.results = None
         self.metrics = {}
+        
+        # Save this as a class attribute so get_holdings() can access it later
+        self.executed_weights = None
 
     def run(self):
         """Run the strategy and optional benchmark backtest.
@@ -177,10 +197,12 @@ class VectorizedBacktester:
         """
         # --- 1. Strategy Calculation ---
         asset_returns = self.prices.pct_change().fillna(0.0)
-        executed_weights = self.weights.shift(1).fillna(0.0)
         
-        gross_returns = (executed_weights * asset_returns).sum(axis=1)
-        turnover = executed_weights.diff().abs().sum(axis=1).fillna(0.0)
+        # CRITICAL UPDATE: Save to self so we can query holdings later!
+        self.executed_weights = self.weights.shift(1).fillna(0.0)
+        
+        gross_returns = (self.executed_weights * asset_returns).sum(axis=1)
+        turnover = self.executed_weights.diff().abs().sum(axis=1).fillna(0.0)
         tc_drag = turnover * self.fee_rate
         net_returns = gross_returns - tc_drag
         
@@ -320,9 +342,9 @@ class VectorizedBacktester:
         
         # --- Plot 2: Drawdown Curves ---
         axes[1].fill_between(self.results.index, self.results['Drawdown'] * 100, 0, color='blue', alpha=0.2)
-        axes[1].plot(self.results.index, self.results['Drawdown'] * 100, color='blue', linewidth=1, label='Strategy DD')
+        axes[1].plot(self.results.index, self.results['Drawdown'] * 100, color='blue', linewidth=1, label=f'{rolling_window_days}-Day Strategy DD')
         if self.benchmark_prices is not None:
-            axes[1].plot(self.results.index, self.results['Bench_Drawdown'] * 100, color='orange', linewidth=1, alpha=0.8, label='Benchmark DD')
+            axes[1].plot(self.results.index, self.results['Bench_Drawdown'] * 100, color='orange', linewidth=1, alpha=0.8, label=f'{rolling_window_days}-Day Benchmark DD')
         axes[1].set_title('Drawdown (%)')
         axes[1].set_ylabel('Drawdown (%)')
         axes[1].legend(loc='lower left')
@@ -366,3 +388,93 @@ class VectorizedBacktester:
         
         plt.tight_layout()
         plt.show()
+
+    def get_holdings(self, timestamp: str) -> dict:
+        """
+        Retrieves the exact portfolio allocation for a given timestamp.
+        Example: engine.get_holdings('2024-03-05 14:00:00')
+
+        Timezone handling:
+        - If the backtest index is timezone-aware, naive inputs are localized to
+          that timezone and aware inputs are converted.
+        - If the backtest index is timezone-naive, aware inputs are converted to
+          naive UTC for comparison.
+        """
+        if self.executed_weights is None:
+            raise ValueError("You must run() the backtest before checking holdings.")
+
+        # Normalize timestamp to the same timezone representation as the index.
+        index = self.executed_weights.index
+        ts = pd.Timestamp(timestamp)
+
+        if isinstance(index, pd.DatetimeIndex):
+            if index.tz is not None:
+                if ts.tzinfo is None:
+                    ts = ts.tz_localize(index.tz)
+                else:
+                    ts = ts.tz_convert(index.tz)
+            elif ts.tzinfo is not None:
+                ts = ts.tz_convert("UTC").tz_localize(None)
+
+        # Ensure the timestamp exists in our backtest index.
+        if ts not in index:
+            # Fallback: get the closest preceding timestamp
+            idx = index.get_indexer([ts], method='pad')[0]
+            if idx == -1:
+                return {"Error": "Timestamp is before the backtest started."}
+            ts = index[idx]
+            print(f"Exact timestamp not found. Showing holdings for closest prior bar: {ts}")
+            
+        # Extract the row for this timestamp
+        row = self.executed_weights.loc[ts]
+        
+        # Filter for coins where weight > 0 and convert to dictionary
+        active_holdings = row[row > 0].to_dict()
+        
+        return active_holdings
+    
+    def get_holdings_history(self, output_format: str = 'long') -> pd.DataFrame:
+        """
+        Returns a complete history of all portfolio members over time.
+        
+        Args:
+            output_format: 
+                'long' -> Standard database format (Timestamp | Symbol | Weight). Best for analysis.
+                'wide' -> Visual format (Timestamp | Active_Members). Best for quick reading.
+        """
+        if self.executed_weights is None:
+            raise ValueError("You must run() the backtest before checking holdings.")
+            
+        if output_format == 'long':
+            # 1. Prepare the DataFrame for melting
+            df = self.executed_weights.copy()
+            df.index.name = 'Timestamp'
+            
+            # 2. Melt the wide matrix into a long format
+            # This turns every (Time, Symbol) coordinate into its own row
+            long_df = df.reset_index().melt(
+                id_vars='Timestamp', 
+                var_name='Symbol', 
+                value_name='Weight'
+            )
+            
+            # 3. Filter out zero weights (things we don't hold) and sort
+            active_holdings = long_df[long_df['Weight'] > 0].copy()
+            active_holdings.sort_values(by=['Timestamp', 'Weight'], ascending=[True, False], inplace=True)
+            
+            return active_holdings.set_index('Timestamp')
+            
+        elif output_format == 'wide':
+            # Returns a single column containing a dictionary of {Symbol: Weight} for each bar
+            def get_active_members(row):
+                active = row[row > 0]
+                if active.empty:
+                    return "CASH"
+                # Format nicely: "BTC: 20.0%, ETH: 20.0%"
+                return ", ".join([f"{sym}: {w*100:.1f}%" for sym, w in active.items()])
+                
+            members = self.executed_weights.apply(get_active_members, axis=1)
+            return pd.DataFrame({'Portfolio_Members': members})
+            
+        else:
+            raise ValueError("output_format must be 'long' or 'wide'.")

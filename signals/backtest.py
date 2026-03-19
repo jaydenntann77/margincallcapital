@@ -279,7 +279,7 @@ class VectorizedBacktester:
     def print_tearsheet(self):
         """Prints a side-by-side comparison."""
         print("="*60)
-        print(f"{'🚀 STRATEGY TEARSHEET':^60}")
+        print(f"{'STRATEGY TEARSHEET':^60}")
         print("="*60)
         
         has_bench = 'Benchmark' in self.metrics

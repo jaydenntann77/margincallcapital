@@ -44,30 +44,40 @@ logger = logging.getLogger(__name__)
 @dataclass
 class MomentumConfig:
     # Signal lookback windows (in 1h bars)
-    lookback_primary:   int   = 8      # EDA winner — best Sharpe 1.94
-    lookback_secondary: int   = 4      # blended for smoothness
-    weight_primary:     float = 0.70   # 70% 8h, 30% 4h
+    # EDA + sensitivity sweep winner: 6h (Sharpe 2.39, fwd_ret 0.020%)
+    # vs original 8h (Sharpe 1.94). 3h secondary replaces 4h proportionally.
+    lookback_primary:   int   = 6      # primary momentum window
+    lookback_secondary: int   = 3      # secondary blend window
+    weight_primary:     float = 0.70   # 70% 6h, 30% 3h
     weight_secondary:   float = 0.30
 
     # Universe / portfolio construction
-    top_n:              int   = 10     # max long positions
-    min_n:              int   = 3      # don't trade if fewer coins qualify
-    max_weight:         float = 0.25   # max 25% in any single coin
-    min_vol_usd_per_h:  float = 50_000 # min $50k hourly dollar volume
+    top_n:               int   = 8       # max long positions (tighter — higher conviction)
+    min_n:               int   = 3       # don't trade if fewer coins qualify
+    max_weight:          float = 0.25    # max 25% in any single coin
+    min_vol_usd_per_h:   float = 50_000  # min $50k hourly dollar volume
+
+    # Score quality gate — only hold coins scoring above this threshold.
+    # Prevents low-momentum coins (TRX, PAXG) dominating via inv-vol sizing.
+    # 0.60 = top ~40% of universe must have genuine positive momentum.
+    min_score_threshold: float = 0.60
 
     # Volatility scaling
-    vol_lookback:       int   = 14     # ATR lookback in hours
-    vol_floor:          float = 0.002  # floor to avoid div-by-zero (0.2% per hour)
-    vol_target:         float = 0.01   # target 1% hourly vol per position
+    vol_lookback:        int   = 14      # ATR lookback in hours
+    vol_floor:           float = 0.002   # floor to avoid div-by-zero
+    vol_target:          float = 0.01    # target 1% hourly vol per position
 
     # Data requirements
-    # Must be > lookback_primary so the momentum calc always has enough rows.
-    # Keep it small — we fetch plenty of history anyway via hours_needed.
-    min_bars_required:  int   = 10     # need ≥ 10 hourly bars to score a coin
-    interval:           str   = '1m'   # raw data interval in DuckDB
+    min_bars_required:   int   = 10      # need >= 10 hourly bars to score a coin
+    interval:            str   = '1m'    # raw data interval in DuckDB
 
-    # Rebalance
-    rebalance_freq_h:   int   = 1      # every 1 hour
+    # Rebalance frequency and turnover gate.
+    # Root cause: 38.95% mean turnover/hour = 0.935%/day fee drag.
+    # Fix 1: rebalance every 4h instead of 1h (6x/day vs 24x/day).
+    # Fix 2: skip the rebalance entirely if total |delta_weight| < 5%
+    #         (avoids paying fees for noise-driven micro-shifts).
+    rebalance_freq_h:       int   = 4    # recompute signal every 4 hours
+    min_turnover_to_trade:  float = 0.05 # skip rebalance if total |Dw| < 5%
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -104,13 +114,27 @@ class MomentumSignal:
 
     # ── Public API ────────────────────────────────────────────────────────────
 
-    def compute(self, as_of: Optional[datetime] = None) -> Dict[str, float]:
+    def compute(
+        self,
+        as_of: Optional[datetime] = None,
+        prev_weights: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, float]:
         """
         Compute target portfolio weights as of `as_of` timestamp.
 
+        Parameters
+        ----------
+        as_of : datetime, optional
+            Timestamp to compute signal for. Defaults to now().
+        prev_weights : dict, optional
+            Current portfolio weights {symbol: weight}.
+            If provided, applies the turnover gate: if total |delta_weight|
+            < cfg.min_turnover_to_trade, returns prev_weights unchanged
+            (no trade, no fee).
+
         Returns
         -------
-        dict  {symbol: weight}  — weights sum to ≤ 1.0, all ≥ 0 (long-only)
+        dict  {symbol: weight}  — weights sum to <= 1.0, all >= 0 (long-only)
         Returns empty dict {} if fewer than cfg.min_n coins qualify.
         """
         as_of = as_of or datetime.now(timezone.utc)
@@ -119,25 +143,61 @@ class MomentumSignal:
         hourly = self._load_hourly_bars(as_of)
         if hourly.empty:
             logger.warning("No hourly bars loaded for %s — returning empty weights", as_of)
-            return {}
+            return prev_weights or {}
 
-        scores  = self._score_coins(hourly)
-        weights = self._size_positions(scores, hourly)
+        scores, mom_raw = self._score_coins(hourly)
+        weights = self._size_positions(scores, mom_raw, hourly)
+
+        # ── Turnover gate ──────────────────────────────────────────────────
+        # If new weights are too similar to current holdings, skip the trade.
+        # Saves fees on noise-driven micro-shifts between rebalances.
+        if prev_weights and weights:
+            all_syms = set(weights) | set(prev_weights)
+            turnover = sum(
+                abs(weights.get(s, 0.0) - prev_weights.get(s, 0.0))
+                for s in all_syms
+            ) / 2
+            if turnover < self.cfg.min_turnover_to_trade:
+                logger.debug(
+                    "Turnover gate: %.2f%% < %.2f%% threshold — holding current weights",
+                    turnover * 100, self.cfg.min_turnover_to_trade * 100,
+                )
+                return prev_weights
         return weights
 
     def compute_batch(self, timestamps: List[datetime]) -> pd.DataFrame:
         """
         Compute weights for a list of timestamps (used in backtesting).
 
+        Respects rebalance_freq_h: only calls compute() every N hours.
+        Between rebalances, carries forward the last computed weights.
+        Also passes prev_weights to each compute() call for the turnover gate.
+
         Returns
         -------
         pd.DataFrame  index=timestamp, columns=symbols, values=weights
         """
-        records = []
+        records      = []
+        prev_weights: Dict[str, float] = {}
+        last_rebal_ts: Optional[datetime] = None
+
         for ts in timestamps:
-            w = self.compute(ts)
+            # Only recompute every rebalance_freq_h hours
+            should_rebalance = (
+                last_rebal_ts is None or
+                (ts - last_rebal_ts).total_seconds() / 3600 >= self.cfg.rebalance_freq_h
+            )
+
+            if should_rebalance:
+                new_weights  = self.compute(ts, prev_weights=prev_weights)
+                if new_weights:
+                    prev_weights  = new_weights
+                    last_rebal_ts = ts
+
+            w       = dict(prev_weights)
             w['ts'] = ts
             records.append(w)
+
         df = pd.DataFrame(records).set_index('ts').fillna(0.0)
         return df
 
@@ -227,7 +287,7 @@ class MomentumSignal:
 
         if pivot.shape[1] < self.cfg.min_n:
             logger.warning("Only %d coins have sufficient history (need %d)", pivot.shape[1], self.cfg.min_n)
-            return pd.Series(dtype=float)
+            return pd.Series(dtype=float), pd.Series(dtype=float)
 
         # ── Momentum scores (log return over lookback window) ──────────────
         def log_mom(df: pd.DataFrame, window: int) -> pd.Series:
@@ -244,13 +304,15 @@ class MomentumSignal:
 
         if mom_primary.empty:
             logger.warning("Not enough bars for primary momentum (need %d)", self.cfg.lookback_primary + 1)
-            return pd.Series(dtype=float)
+            return pd.Series(dtype=float), pd.Series(dtype=float)
 
         # ── Cross-sectional rank (percentile 0→1) ─────────────────────────
-        # Ranking neutralises the absolute level — only relative strength matters
+        # Ranking neutralises the absolute level — only relative strength matters.
+        # We also return raw mom_primary so _size_positions can apply an
+        # absolute momentum filter (coin must be going up, not just less down).
         common = mom_primary.index.intersection(mom_secondary.index)
         if len(common) < self.cfg.min_n:
-            return pd.Series(dtype=float)
+            return pd.Series(dtype=float), pd.Series(dtype=float)
 
         rank_primary   = mom_primary[common].rank(pct=True)
         rank_secondary = mom_secondary[common].rank(pct=True)
@@ -265,34 +327,52 @@ class MomentumSignal:
             len(composite),
             composite.nlargest(3).index.tolist(),
         )
-        return composite
+        return composite, mom_primary[common]
 
     # ── Position sizing ───────────────────────────────────────────────────────
 
     def _size_positions(
         self,
         scores: pd.Series,
+        mom_raw: pd.Series,
         hourly: pd.DataFrame,
     ) -> Dict[str, float]:
         """
         Convert composite scores → portfolio weights.
 
         Steps:
-        1. Select top-N coins by composite score
-        2. Apply hourly dollar-volume filter
-        3. Compute inverse-ATR vol weight
-        4. Scale weights to sum to 1.0
-        5. Cap at max_weight, renormalise
-
-        Returns
-        -------
-        dict  {symbol: weight}
+        1a. Score quality gate  (relative rank >= min_score_threshold)
+        1b. Absolute momentum gate  (raw 6h return must be > 0)
+        1c. Select top-N from survivors
+        2.  Liquidity check at current bar
+        3.  Inverse-ATR vol weight
+        4.  Normalise to sum = 1.0
+        5.  Cap at max_weight, renormalise
         """
         if scores.empty or len(scores) < self.cfg.min_n:
             return {}
 
-        # ── Step 1: Select top-N ───────────────────────────────────────────
-        top_coins = scores.nlargest(self.cfg.top_n).index.tolist()
+        # ── Step 1a: Relative score gate ───────────────────────────────────
+        # Must be in top ~40% of universe by momentum rank.
+        qualified = scores[scores >= self.cfg.min_score_threshold]
+
+        # ── Step 1b: Absolute momentum gate ───────────────────────────────
+        # Raw 6h log return must be strictly positive.
+        # This is the key fix for TRX/PAXG dominance: they only enter
+        # when they are genuinely trending up in absolute terms, not
+        # just less-negative than a falling market.
+        positive_mom = mom_raw[mom_raw > 0].index
+        qualified    = qualified[qualified.index.isin(positive_mom)]
+
+        if len(qualified) < self.cfg.min_n:
+            logger.debug(
+                "Only %d coins pass both gates (score>=%.2f AND mom>0) — holding cash",
+                len(qualified), self.cfg.min_score_threshold,
+            )
+            return {}
+
+        # ── Step 1c: Select top-N from qualified ──────────────────────────
+        top_coins = qualified.nlargest(self.cfg.top_n).index.tolist()
 
         # ── Step 2: Liquidity check at current bar ─────────────────────────
         last_bar = (
@@ -387,12 +467,13 @@ class SignalDiagnostics:
     def score_table(self, as_of: Optional[datetime] = None) -> pd.DataFrame:
         """
         Returns full score table for all coins at `as_of`.
-        Includes: mom_8h, mom_4h, composite_score, rank, vol_atr_pct, inv_vol_weight.
+        Includes: mom_primary, mom_secondary, composite_score, rank,
+                  abs_mom_pass, score_pass, atr_pct_14h, weight, selected.
         """
-        as_of   = as_of or datetime.now(timezone.utc)
-        as_of   = as_of.replace(minute=0, second=0, microsecond=0)
-        hourly  = self.sig._load_hourly_bars(as_of)
-        scores  = self.sig._score_coins(hourly)
+        as_of  = as_of or datetime.now(timezone.utc)
+        as_of  = as_of.replace(minute=0, second=0, microsecond=0)
+        hourly = self.sig._load_hourly_bars(as_of)
+        scores, mom_raw = self.sig._score_coins(hourly)
 
         if scores.empty:
             return pd.DataFrame()
@@ -404,23 +485,28 @@ class SignalDiagnostics:
         )
         cfg = self.sig.cfg
 
-        mom_8h = pd.Series({
+        mom_primary = pd.Series({
             s: np.log(pivot[s].iloc[-1] / pivot[s].iloc[-(cfg.lookback_primary + 1)])
             for s in scores.index if s in pivot.columns and len(pivot[s].dropna()) > cfg.lookback_primary
         })
-        mom_4h = pd.Series({
+        mom_secondary = pd.Series({
             s: np.log(pivot[s].iloc[-1] / pivot[s].iloc[-(cfg.lookback_secondary + 1)])
             for s in scores.index if s in pivot.columns and len(pivot[s].dropna()) > cfg.lookback_secondary
         })
 
         df = pd.DataFrame({
-            'mom_8h':    mom_8h,
-            'mom_4h':    mom_4h,
-            'score':     scores,
+            f'mom_{cfg.lookback_primary}h':   mom_primary,
+            f'mom_{cfg.lookback_secondary}h': mom_secondary,
+            'score':                          scores,
         }).sort_values('score', ascending=False)
 
-        df['rank']     = range(1, len(df) + 1)
-        df['selected'] = df['rank'] <= cfg.top_n
+        df['rank']          = range(1, len(df) + 1)
+        df['score_pass']    = df['score'] >= cfg.min_score_threshold
+        df['abs_mom_pass']  = mom_raw.reindex(df.index) > 0
+        df['both_pass']     = df['score_pass'] & df['abs_mom_pass']
+        df['selected']      = False
+        passing_top_n = df[df['both_pass']].head(cfg.top_n).index
+        df.loc[passing_top_n, 'selected'] = True
 
         # ATR%
         atr_pcts = {}
@@ -437,7 +523,7 @@ class SignalDiagnostics:
 
         df['atr_pct_14h'] = pd.Series(atr_pcts)
 
-        weights = self.sig._size_positions(scores, hourly)
+        weights = self.sig._size_positions(scores, mom_raw, hourly)
         df['weight'] = pd.Series(weights)
         df['weight'] = df['weight'].fillna(0.0)
 

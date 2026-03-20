@@ -18,8 +18,7 @@ from strategy import Signal
 import config as cfg
 
 if TYPE_CHECKING:
-    # Avoid a circular import; only used for type hints.
-    from api_client import BotApiClient
+    from client import RoostooClient
 
 logger = get_logger("RiskManager")
 
@@ -27,7 +26,7 @@ logger = get_logger("RiskManager")
 class RiskManager:
     """Stateful risk-guardrail layer."""
 
-    def __init__(self, api_client: "BotApiClient") -> None:
+    def __init__(self, api_client: "RoostooClient") -> None:
         self._api = api_client
         # Cooldown tracking
         self._last_signal_time: dict[str, float]  = {}   # pair → epoch seconds

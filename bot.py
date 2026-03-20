@@ -28,7 +28,7 @@ from logger import get_logger
 
 logger = get_logger("Bot")
 
-from api_client   import BotApiClient
+from client       import RoostooClient
 from strategy     import EMACrossoverStrategy, Signal
 from risk_manager import RiskManager
 import config as cfg
@@ -56,7 +56,7 @@ def _handle_shutdown(sig: int, frame) -> None:  # type: ignore[type-arg]
 # ---------------------------------------------------------------------------
 
 def _execute_signal(
-    api:     BotApiClient,
+    api:     RoostooClient,
     risk:    RiskManager,
     pair:    str,
     sig:     Signal,
@@ -133,7 +133,7 @@ def _execute_signal(
 # ---------------------------------------------------------------------------
 
 def _cancel_stale_orders(
-    api:     BotApiClient,
+    api:     RoostooClient,
     risk:    RiskManager,
     dry_run: bool,
 ) -> None:
@@ -157,7 +157,7 @@ def _cancel_stale_orders(
 # Portfolio snapshot
 # ---------------------------------------------------------------------------
 
-def _log_portfolio(api: BotApiClient) -> None:
+def _log_portfolio(api: RoostooClient) -> None:
     """Log a concise portfolio summary line."""
     try:
         pf        = api.get_portfolio_value()
@@ -175,7 +175,7 @@ def _log_portfolio(api: BotApiClient) -> None:
 # Startup helpers
 # ---------------------------------------------------------------------------
 
-def _validate_pairs(api: BotApiClient, pairs: list[str]) -> list[str]:
+def _validate_pairs(api: RoostooClient, pairs: list[str]) -> list[str]:
     """
     Filter the configured pair list to those that actually exist on the
     exchange and have CanTrade=True.
@@ -188,7 +188,7 @@ def _validate_pairs(api: BotApiClient, pairs: list[str]) -> list[str]:
     return valid
 
 
-def _sync_open_orders(api: BotApiClient, risk: RiskManager) -> None:
+def _sync_open_orders(api: RoostooClient, risk: RiskManager) -> None:
     """
     On startup, fetch any open orders left from a previous run and register
     them with the risk manager so they are subject to stale-order cleanup.
@@ -246,7 +246,7 @@ def main() -> None:
 
     # Initialise components
     try:
-        api      = BotApiClient()
+        api      = RoostooClient()
         strategy = EMACrossoverStrategy(cfg.FAST_EMA_PERIOD, cfg.SLOW_EMA_PERIOD)
         risk     = RiskManager(api)
     except Exception as exc:

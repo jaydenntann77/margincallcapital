@@ -1,3 +1,5 @@
+import math
+import random
 import time
 import hmac
 import hashlib
@@ -20,6 +22,7 @@ class RoostooClient:
         self.api_key = API_KEY
         self.api_secret = API_SECRET
         self.session = requests.Session()
+        self._exchange_cache: dict = {}   # populated once on first call
         logger.info("RoostooClient initialized with base URL: %s", self.base_url)
         logger.info("Trading client initialized and ready.")
 
@@ -85,13 +88,13 @@ class RoostooClient:
                 request_kwargs["params"] = payload
 
             response = self.session.request(method_upper, url, **request_kwargs)
-            
+
             # Log the outgoing intent
             logger.debug(f"Request: {method} {endpoint} | Payload: {payload}")
-            
+
             response.raise_for_status()
             data = response.json()
-            
+
             return data
 
         except requests.exceptions.RequestException as e:
@@ -106,15 +109,71 @@ class RoostooClient:
                 logger.error("API Error Response Body: %s", response_text)
             return {"error": str(e), "status_code": status, "response_text": response_text, "Success": False}
 
+    def _call_with_retry(self, method, *args, **kwargs) -> Dict:
+        """
+        Call any RoostooClient method and retry on transient network failures.
+        Network errors are detected from the error message in the returned dict
+        (the underlying _request never raises — it converts exceptions to dicts).
+        """
+        from config import MAX_RETRIES, RETRY_BACKOFF, RETRY_JITTER
+        last: dict = {}
+        for attempt in range(MAX_RETRIES + 1):
+            result = method(*args, **kwargs)
+            last = result
+            if isinstance(result, dict) and result.get("Success") is False:
+                err = str(result.get("error", "")).lower()
+                is_network = any(
+                    kw in err for kw in
+                    ("connection", "timeout", "network", "max retries", "refused", "reset by peer")
+                )
+                if is_network and attempt < MAX_RETRIES:
+                    wait = RETRY_BACKOFF * (2 ** attempt) * (1 + random.uniform(0, RETRY_JITTER))
+                    logger.warning(
+                        "Network error (attempt %d/%d): %s — retrying in %.1fs",
+                        attempt + 1, MAX_RETRIES + 1, err, wait,
+                    )
+                    time.sleep(wait)
+                    continue
+            return result
+        logger.error("All retry attempts exhausted.")
+        return last
+
+    ## --- Precision helpers (used by bot order methods) ---
+
+    def _fmt_quantity(self, pair: str, quantity: float) -> str:
+        """
+        Format a quantity string to the exchange's AmountPrecision for this pair.
+        AmountPrecision=0 means integer quantities (e.g. DOGE, SHIB, BONK).
+        Truncates (floors) rather than rounds to avoid over-ordering.
+        """
+        meta = self.get_pair_meta(pair)
+        amt_prec = meta.get("AmountPrecision", 8)
+        if amt_prec == 0:
+            return str(int(math.floor(quantity)))
+        factor = 10 ** amt_prec
+        truncated = math.floor(quantity * factor) / factor
+        return f"{truncated:.{amt_prec}f}"
+
+    def _fmt_price(self, pair: str, price: float) -> str:
+        """Format a price string to the exchange's PricePrecision for this pair."""
+        meta = self.get_pair_meta(pair)
+        price_prec = meta.get("PricePrecision", 8)
+        return f"{price:.{price_prec}f}"
+
     ## --- Public Endpoints ---
 
     def get_exchange_info(self) -> Dict:
-        """Fetches market metadata."""
-        logger.info("Fetching exchange info...")
-        return self._request("GET", "/v3/exchangeInfo")
+        """Fetches (and caches) market metadata."""
+        if not self._exchange_cache:
+            logger.info("Fetching exchange info...")
+            result = self._request("GET", "/v3/exchangeInfo")
+            if result.get("IsRunning") is not None:
+                self._exchange_cache = result
+            return result
+        return self._exchange_cache
 
     def get_ticker(self, pair: str) -> Dict:
-        """Fetches real-time price for a pair (e.g., 'BTC-USDT')."""
+        """Fetches real-time price for a pair (e.g., 'BTC/USD')."""
         params = {"pair": pair, "timestamp": self._get_timestamp()}
         return self._request("GET", "/v3/ticker", params=params)
 
@@ -234,8 +293,166 @@ class RoostooClient:
             logger.warning("ORDER_REJECTED: %s", result.get("ErrMsg") or result.get("error") or "Unknown Error")
 
         return result
-    
-    ## --- Additional Methods for Analytics ---
+
+    def cancel_order(self, order_id: str) -> Dict:
+        """
+        Cancel an open order by ID (SIGNED): POST /v3/cancel_order.
+        NOTE: Adjust the endpoint path if the live API differs.
+        """
+        logger.info("Cancelling order %s", order_id)
+        return self._call_with_retry(
+            self._request,
+            "POST", "/v3/cancel_order",
+            signed=True,
+            params={"order_id": str(order_id)},
+        )
+
+    ## --- Bot convenience methods ---
+
+    def get_pair_meta(self, pair: str) -> Dict:
+        """Return the metadata dict for a single pair (PricePrecision, AmountPrecision, etc.)."""
+        return self.get_exchange_info().get("TradePairs", {}).get(pair, {})
+
+    def validate_pair(self, pair: str) -> bool:
+        """Return True if the pair exists on the exchange and CanTrade=True."""
+        meta = self.get_pair_meta(pair)
+        return bool(meta) and bool(meta.get("CanTrade", False))
+
+    def get_price(self, pair: str) -> Optional[float]:
+        """Return the last trade price for a pair, or None on failure."""
+        try:
+            ticker = self._call_with_retry(self.get_ticker, pair)
+            if not ticker.get("Success"):
+                logger.debug("Ticker Success=False for %s: %s", pair, ticker.get("ErrMsg"))
+                return None
+            pair_data = ticker.get("Data", {}).get(pair, {})
+            raw = pair_data.get("LastPrice")
+            return float(raw) if raw is not None else None
+        except Exception as exc:
+            logger.error("get_price(%s) raised: %s", pair, exc)
+            return None
+
+    def get_usd_balance(self) -> float:
+        """Return the free USD balance."""
+        try:
+            df = self.get_balance_df()
+            if df.empty:
+                return 0.0
+            row = df[df["asset"] == "USD"]
+            return float(row["free"].iloc[0]) if not row.empty else 0.0
+        except Exception as exc:
+            logger.error("get_usd_balance failed: %s", exc)
+            return 0.0
+
+    def get_asset_balance(self, asset: str) -> float:
+        """Return the free balance for a given asset symbol (e.g. 'BTC')."""
+        try:
+            df = self.get_balance_df()
+            if df.empty:
+                return 0.0
+            row = df[df["asset"] == asset]
+            return float(row["free"].iloc[0]) if not row.empty else 0.0
+        except Exception as exc:
+            logger.error("get_asset_balance(%s) failed: %s", asset, exc)
+            return 0.0
+
+    def get_portfolio_value(self) -> Dict:
+        """
+        Return a snapshot of portfolio value.
+        Keys: usd_cash, asset_values ({asset: {amount, price, value_usd}}), total_usd.
+        """
+        try:
+            df = self.get_balance_df()
+            if df.empty:
+                return {"usd_cash": 0.0, "asset_values": {}, "total_usd": 0.0}
+
+            usd_row  = df[df["asset"] == "USD"]
+            usd_cash = float(usd_row["free"].iloc[0]) if not usd_row.empty else 0.0
+
+            asset_values: Dict = {}
+            total_usd = usd_cash
+
+            for _, row in df[df["asset"] != "USD"].iterrows():
+                asset        = str(row["asset"])
+                total_amount = float(row["total"])
+                if total_amount <= 0:
+                    continue
+                price = self.get_price(f"{asset}/USD")
+                if price:
+                    value = total_amount * price
+                    asset_values[asset] = {"amount": total_amount, "price": price, "value_usd": value}
+                    total_usd += value
+
+            return {"usd_cash": usd_cash, "asset_values": asset_values, "total_usd": total_usd}
+        except Exception as exc:
+            logger.error("get_portfolio_value failed: %s", exc)
+            return {"usd_cash": 0.0, "asset_values": {}, "total_usd": 0.0}
+
+    def get_open_orders(self, pair: Optional[str] = None) -> list:
+        """Return a list of currently pending/open orders."""
+        try:
+            result = self._call_with_retry(self.query_order, pair=pair, pending_only=True)
+            if result.get("Success") is False:
+                err = (result.get("ErrMsg") or "").lower()
+                if "no order" in err:
+                    return []
+                logger.debug("get_open_orders: %s", result.get("ErrMsg"))
+                return []
+            return result.get("OrderMatched") or []
+        except Exception as exc:
+            logger.error("get_open_orders failed: %s", exc)
+            return []
+
+    def get_order_status(self, order_id: str) -> Dict:
+        """Return the status dict for a specific order, or {} if not found."""
+        try:
+            result = self._call_with_retry(self.query_order, order_id=order_id)
+            orders = result.get("OrderMatched") or []
+            return orders[0] if orders else {}
+        except Exception as exc:
+            logger.error("get_order_status(%s) failed: %s", order_id, exc)
+            return {}
+
+    def place_limit_buy(self, pair: str, quantity: float, price: float) -> Dict:
+        """Place a limit BUY with exchange-correct precision."""
+        qty_str   = self._fmt_quantity(pair, quantity)
+        price_str = self._fmt_price(pair, price)
+        logger.info("Placing LIMIT BUY  %s  qty=%s  price=%s", pair, qty_str, price_str)
+        return self._call_with_retry(
+            self.place_order,
+            pair=pair, side="BUY", type="LIMIT",
+            quantity=qty_str, price=float(price_str),
+        )
+
+    def place_limit_sell(self, pair: str, quantity: float, price: float) -> Dict:
+        """Place a limit SELL with exchange-correct precision."""
+        qty_str   = self._fmt_quantity(pair, quantity)
+        price_str = self._fmt_price(pair, price)
+        logger.info("Placing LIMIT SELL %s  qty=%s  price=%s", pair, qty_str, price_str)
+        return self._call_with_retry(
+            self.place_order,
+            pair=pair, side="SELL", type="LIMIT",
+            quantity=qty_str, price=float(price_str),
+        )
+
+    def place_market_buy(self, pair: str, quantity: float) -> Dict:
+        """Place a market BUY with exchange-correct precision."""
+        qty_str = self._fmt_quantity(pair, quantity)
+        logger.info("Placing MARKET BUY  %s  qty=%s", pair, qty_str)
+        return self._call_with_retry(
+            self.place_order, pair=pair, side="BUY", type="MARKET", quantity=qty_str,
+        )
+
+    def place_market_sell(self, pair: str, quantity: float) -> Dict:
+        """Place a market SELL with exchange-correct precision."""
+        qty_str = self._fmt_quantity(pair, quantity)
+        logger.info("Placing MARKET SELL %s  qty=%s", pair, qty_str)
+        return self._call_with_retry(
+            self.place_order, pair=pair, side="SELL", type="MARKET", quantity=qty_str,
+        )
+
+    ## --- Analytics helpers (unchanged) ---
+
     def get_balance_df(self) -> pd.DataFrame:
         """
         Fetches balance and returns a cleaned DataFrame.
@@ -245,7 +462,7 @@ class RoostooClient:
         - 'Balances' (list format, legacy/alt)
         """
         raw_data = self.get_balance()
-        
+
         if raw_data.get('Success') == False:
             logger.warning("Balance fetch failed: %s", raw_data.get('ErrMsg') or raw_data.get('error') or raw_data)
             return pd.DataFrame()
@@ -337,13 +554,13 @@ class RoostooClient:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
 
         return df
-    
+
     def get_order_history_df(self, pair: Optional[str] = None, pending_only: Optional[bool] = None, limit: Optional[int] = None) -> pd.DataFrame:
         """
         Fetches order history and returns a cleaned DataFrame.
         """
         result = self.query_order(pair=pair, pending_only=pending_only, limit=limit)
-        
+
         if result.get('Success') == False:
             err_msg = (result.get('ErrMsg') or "").strip()
             if err_msg.lower() == "no order matched":

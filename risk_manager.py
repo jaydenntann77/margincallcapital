@@ -119,10 +119,11 @@ class RiskManager:
         self,
         pair:      str,
         price:     float,
-        portfolio: dict,   # noqa: ARG002  (used indirectly via asset balance call)
+        portfolio: dict,
     ) -> tuple[bool, str, float]:
         asset         = pair.split("/")[0]
-        asset_balance = self._api.get_asset_balance(asset)
+        # Read from the portfolio snapshot already fetched in check() — avoids a second API call
+        asset_balance = portfolio.get("asset_values", {}).get(asset, {}).get("amount", 0.0)
 
         if asset_balance <= 0:
             return False, f"No {asset} holdings to sell", 0.0

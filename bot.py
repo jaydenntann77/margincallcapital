@@ -163,7 +163,7 @@ def _log_portfolio(api: RoostooClient) -> None:
         pf        = api.get_portfolio_value()
         positions = list(pf.get("asset_values", {}).keys())
         logger.info(
-            "[PORTFOLIO] Total=$%,.2f | Cash=$%,.2f | Positions=%s",
+            "[PORTFOLIO] Total=$%.2f | Cash=$%.2f | Positions=%s",
             pf["total_usd"], pf["usd_cash"],
             positions if positions else "none",
         )

@@ -102,6 +102,10 @@ def _execute_signal(
         )
         risk.record_signal(pair, sig)
         risk.track_order(pair, order_id, "LIMIT")
+        if sig == Signal.BUY:
+            risk.record_entry(pair, price)
+        else:
+            risk.clear_entry(pair)
         return
 
     # ── Limit order failed → fall back to market order ──────────────────
@@ -123,9 +127,59 @@ def _execute_signal(
             sig.value, pair, order_id, quantity,
         )
         risk.record_signal(pair, sig)
+        if sig == Signal.BUY:
+            risk.record_entry(pair, price)
+        else:
+            risk.clear_entry(pair)
     else:
         err2 = market_result.get("ErrMsg") or market_result.get("error") or "unknown"
         logger.error("[ERROR]  Market order also failed for %s: %s", pair, err2)
+
+
+# ---------------------------------------------------------------------------
+# Stop-loss execution
+# ---------------------------------------------------------------------------
+
+def _execute_stop_loss(
+    api:     RoostooClient,
+    risk:    RiskManager,
+    pair:    str,
+    price:   float,
+    dry_run: bool,
+) -> None:
+    """Immediately market-sell the full position when stop-loss is triggered."""
+    portfolio = api.get_portfolio_value()
+    asset     = pair.split("/")[0]
+    quantity  = portfolio.get("asset_values", {}).get(asset, {}).get("amount", 0.0)
+
+    if quantity <= 0:
+        logger.warning("[STOP-LOSS] %s triggered but no holdings found — clearing entry.", pair)
+        risk.clear_entry(pair)
+        return
+
+    logger.warning(
+        "[STOP-LOSS] Executing MARKET SELL %s | qty=%.6f | price=%.5f",
+        pair, quantity, price,
+    )
+
+    if dry_run:
+        logger.info("[DRY RUN] Stop-loss market sell not sent — simulation only.")
+        risk.clear_entry(pair)
+        return
+
+    result = api.place_market_sell(pair, quantity)
+    if result.get("Success"):
+        detail   = result.get("OrderDetail") or {}
+        order_id = str(detail.get("OrderID", "unknown"))
+        logger.warning(
+            "[STOP-LOSS] FILLED — %s | id=%s | qty=%.6f | price=%.5f",
+            pair, order_id, quantity, price,
+        )
+        risk.clear_entry(pair)
+        risk.record_signal(pair, Signal.SELL)   # start cooldown so we don't re-buy immediately
+    else:
+        err = result.get("ErrMsg") or result.get("error") or "unknown"
+        logger.error("[STOP-LOSS] Market sell FAILED for %s: %s — will retry next cycle.", pair, err)
 
 
 # ---------------------------------------------------------------------------
@@ -297,6 +351,11 @@ def main() -> None:
                 price = api.get_price(pair)
                 if price is None:
                     logger.warning("[%s] Price unavailable — skipping this cycle.", pair)
+                    continue
+
+                # Stop-loss check — takes priority over normal signal
+                if risk.check_stop_loss(pair, price):
+                    _execute_stop_loss(api, risk, pair, price, dry_run)
                     continue
 
                 sig = strategy.update(pair, price)

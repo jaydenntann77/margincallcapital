@@ -33,6 +33,8 @@ class RiskManager:
         self._last_signal_type: dict[str, Signal] = {}   # pair → Signal
         # Pending order tracking
         self._pending_orders:   dict[str, dict]   = {}   # pair → order metadata
+        # Stop-loss entry price tracking
+        self._entry_prices:     dict[str, float]  = {}   # pair → entry price
 
     # ------------------------------------------------------------------
     # Core check
@@ -192,3 +194,36 @@ class RiskManager:
     def remove_order(self, pair: str) -> None:
         """Remove a tracked order (after cancellation or confirmed fill)."""
         self._pending_orders.pop(pair, None)
+
+    # ------------------------------------------------------------------
+    # Stop-loss tracking
+    # ------------------------------------------------------------------
+
+    def record_entry(self, pair: str, price: float) -> None:
+        """Record the entry price after a successful BUY order fills."""
+        self._entry_prices[pair] = price
+        logger.info("Entry recorded: %s @ %.5f (stop-loss at %.5f, -%.0f%%)",
+                    pair, price, price * (1 - cfg.STOP_LOSS_PCT), cfg.STOP_LOSS_PCT * 100)
+
+    def check_stop_loss(self, pair: str, current_price: float) -> bool:
+        """
+        Return True if current price has dropped STOP_LOSS_PCT below entry.
+        Only fires if we have a recorded entry price for this pair.
+        """
+        entry = self._entry_prices.get(pair)
+        if entry is None:
+            return False
+        loss_pct = (current_price - entry) / entry
+        if loss_pct <= -cfg.STOP_LOSS_PCT:
+            logger.warning(
+                "[STOP-LOSS] %s triggered — entry=%.5f  current=%.5f  loss=%.2f%%",
+                pair, entry, current_price, loss_pct * 100,
+            )
+            return True
+        return False
+
+    def clear_entry(self, pair: str) -> None:
+        """Clear a pair's entry price after the position is fully closed."""
+        if pair in self._entry_prices:
+            self._entry_prices.pop(pair)
+            logger.debug("Entry price cleared for %s", pair)

@@ -134,7 +134,7 @@ class VectorizedBacktester:
 
     def __init__(self, prices: pd.DataFrame, weights: pd.DataFrame, 
                  benchmark_prices: pd.Series = None,
-                 fee_rate: float = 0.0005, initial_capital: float = 10000.0, 
+                 fee_rate: float = 0.001, slippage: float = 0.0005, initial_capital: float = 10000.0, 
                  periods_per_year: int = 8760,
                  start_date: str = None, 
                  end_date: str = None):
@@ -146,6 +146,7 @@ class VectorizedBacktester:
                 allocations per symbol (for example, 0.2 means 20% capital).
             benchmark_prices: Optional benchmark close-price series.
             fee_rate: Proportional cost per unit turnover per bar.
+            slippage: Proportional cost applied to gross returns to simulate market impact.
             initial_capital: Starting capital for equity curve simulation.
             periods_per_year: Annualization factor for risk metrics.
             start_date: Optional start date string (e.g., '2022-01-01') to slice data.
@@ -168,6 +169,7 @@ class VectorizedBacktester:
         # 2. Align indexes to ensure no shape mismatches
         self.prices, self.weights = prices.align(weights, join='inner')
         self.fee_rate = fee_rate
+        self.slippage = slippage
         self.initial_capital = initial_capital
         self.periods_per_year = periods_per_year
         
@@ -203,7 +205,7 @@ class VectorizedBacktester:
         
         gross_returns = (self.executed_weights * asset_returns).sum(axis=1)
         turnover = self.executed_weights.diff().abs().sum(axis=1).fillna(0.0)
-        tc_drag = turnover * self.fee_rate
+        tc_drag = turnover * (self.fee_rate + self.slippage)
         net_returns = gross_returns - tc_drag
         
         equity = self.initial_capital * (1 + net_returns).cumprod()

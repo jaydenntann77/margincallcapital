@@ -51,7 +51,7 @@ MIN_HISTORY_BARS: int = SLOW_EMA_PERIOD + 1
 # ---------------------------------------------------------------------------
 # Position Sizing & Risk
 # ---------------------------------------------------------------------------
-TRADE_FRACTION: float      = 0.02   # Fraction of total portfolio per BUY trade
+TRADE_FRACTION: float      = 0.001  # Fraction of total portfolio per BUY trade (0.10%)
 MAX_POSITION_FRAC: float   = 0.10   # Max fraction of portfolio in any single asset
 SELL_FRACTION: float       = 1.0    # Fraction of current holdings sold per SELL signal
 MIN_ORDER_VALUE_USD: float = 15.0   # Minimum USD value per order (buffer above MiniOrder=1)

@@ -41,17 +41,17 @@ TRADING_PAIRS: list[str] = [
 # ---------------------------------------------------------------------------
 # EMA Strategy Parameters
 # ---------------------------------------------------------------------------
-FAST_EMA_PERIOD: int = 9     # Short-term EMA period (bars)
-SLOW_EMA_PERIOD: int = 21    # Long-term  EMA period (bars)
+FAST_EMA_PERIOD: int = 9     # Short-term EMA period (bars) — 9 × 10s = 1.5min
+SLOW_EMA_PERIOD: int = 30   # Long-term  EMA period (bars) — 30 × 10s = 5min
 
 # Number of bars required before the strategy emits a real signal.
 # Allows both EMAs to converge from their seed value (first observed price).
-MIN_HISTORY_BARS: int = SLOW_EMA_PERIOD + 1
+MIN_HISTORY_BARS: int = SLOW_EMA_PERIOD + 1   # 31 bars = ~5.2 min warmup
 
 # ---------------------------------------------------------------------------
 # Position Sizing & Risk
 # ---------------------------------------------------------------------------
-TRADE_FRACTION: float      = 0.02   # Fraction of total portfolio per BUY trade
+TRADE_FRACTION: float      = 0.0005 # Fraction of total portfolio per BUY trade (5 bps / 0.05%)
 MAX_POSITION_FRAC: float   = 0.10   # Max fraction of portfolio in any single asset
 SELL_FRACTION: float       = 1.0    # Fraction of current holdings sold per SELL signal
 MIN_ORDER_VALUE_USD: float = 15.0   # Minimum USD value per order (buffer above MiniOrder=1)

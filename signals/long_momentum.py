@@ -5,14 +5,14 @@ class LongOnlyMomentumSignal:
     """Generate long-only cross-sectional momentum portfolio weights with vol sizing."""
 
     def __init__(self, 
-                 fast_span: int = 24, 
-                 slow_span: int = 72, 
-                 vol_span: int = 260, 
-                 z_score_threshold: float = 0.0, 
-                 top_n: int = 20,
+                 fast_span: int = 5, 
+                 slow_span: int = 20, 
+                 vol_span: int = 250, 
+                 z_score_threshold: float = 0.9, 
+                 top_n: int = 3,
                  trend_filter_span: int = 200,
                  target_vol: float = 0.40,
-                 annualization_factor: float = 365.0):
+                 annualization_factor: float = 365.0 * 6):
         """
         Args:
             fast_span: Span for the fast EMA.

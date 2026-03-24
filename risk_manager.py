@@ -45,37 +45,57 @@ class RiskManager:
         pair:   str,
         signal: Signal,
         price:  float,
+        share:  float = 1.0,  # New: percentage of total equity this strategy can use
     ) -> tuple[bool, str, float]:
-        """
-        Determine whether a signal passes all risk checks.
-
-        Returns
-        -------
-        can_trade : bool
-        reason    : str   — human-readable explanation (logged by the caller)
-        quantity  : float — computed trade quantity (0.0 when can_trade=False)
-        """
-        # 1. Cooldown — same direction, same pair, within window
+        """Determine whether a signal passes risk checks based on a capital share."""
+        # 1. Cooldown check (unchanged)
         if self._in_cooldown(pair, signal):
-            remaining = int(
-                cfg.SIGNAL_COOLDOWN_SECONDS
-                - (time.time() - self._last_signal_time.get(pair, 0))
-            )
-            return False, f"Cooldown — {signal.value} signal within {remaining}s", 0.0
+            remaining = int(cfg.SIGNAL_COOLDOWN_SECONDS - (time.time() - self._last_signal_time.get(pair, 0)))
+            return False, f"Cooldown — {signal.value} within {remaining}s", 0.0
 
-        # 2. Fetch a live portfolio snapshot
+        # 2. Fetch live portfolio and scale by share
         portfolio = self._api.get_portfolio_value()
-        total_usd = portfolio.get("total_usd", 0.0)
-        if total_usd <= 0:
-            return False, "Cannot determine portfolio value", 0.0
+        full_total_usd = portfolio.get("total_usd", 0.0)
+        
+        # The sub-strategy only "sees" its portion of the total equity
+        strat_total_usd = full_total_usd * share
+        if strat_total_usd <= 0:
+            return False, "Strategy allocation has no value", 0.0
 
-        trade_value = total_usd * cfg.TRADE_FRACTION
+        trade_value = strat_total_usd * cfg.TRADE_FRACTION
 
         # 3. Signal-specific checks
         if signal == Signal.BUY:
-            return self._check_buy(pair, price, trade_value, portfolio, total_usd)
+            # Scale available cash by the strategy share
+            strat_usd_cash = portfolio.get("usd_cash", 0.0) * share
+            
+            if strat_usd_cash < cfg.MIN_ORDER_VALUE_USD:
+                return False, f"Insufficient strategy cash (${strat_usd_cash:.2f})", 0.0
+
+            # Max-position cap relative to the TOTAL portfolio for safety
+            asset = pair.split("/")[0]
+            current_val = portfolio.get("asset_values", {}).get(asset, {}).get("value_usd", 0.0)
+            
+            # We ensure this specific strategy's buy doesn't push the asset over the global limit
+            if full_total_usd > 0 and (current_val + trade_value) / full_total_usd > cfg.MAX_POSITION_FRAC:
+                return False, f"{asset} would exceed global max position cap", 0.0
+
+            actual_value = min(trade_value, strat_usd_cash)
+            quantity = actual_value / price
+            return True, "OK", quantity
+
         if signal == Signal.SELL:
-            return self._check_sell(pair, price, portfolio)
+            asset = pair.split("/")[0]
+            # Sell fraction applies to the total holdings of that asset
+            asset_balance = portfolio.get("asset_values", {}).get(asset, {}).get("amount", 0.0)
+            if asset_balance <= 0:
+                return False, f"No {asset} to sell", 0.0
+
+            quantity = asset_balance * cfg.SELL_FRACTION
+            if (quantity * price) < cfg.MIN_ORDER_VALUE_USD:
+                return False, "Sell value too small", 0.0
+                
+            return True, "OK", quantity
 
         return False, f"Unsupported signal: {signal}", 0.0
 

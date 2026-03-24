@@ -39,23 +39,12 @@ TRADING_PAIRS: list[str] = [
 ]
 
 # ---------------------------------------------------------------------------
-# EMA Strategy Parameters
-# ---------------------------------------------------------------------------
-FAST_EMA_PERIOD: int = 9     # Short-term EMA period (bars) — 9 × 10s = 1.5min
-SLOW_EMA_PERIOD: int = 30   # Long-term  EMA period (bars) — 30 × 10s = 5min
-
-# Number of bars required before the strategy emits a real signal.
-# Allows both EMAs to converge from their seed value (first observed price).
-MIN_HISTORY_BARS: int = SLOW_EMA_PERIOD + 1   # 31 bars = ~5.2 min warmup
-
-# ---------------------------------------------------------------------------
 # Position Sizing & Risk
 # ---------------------------------------------------------------------------
-TRADE_FRACTION: float      = 0.0005 # Fraction of total portfolio per BUY trade (5 bps / 0.05%)
 MAX_POSITION_FRAC: float   = 0.10   # Max fraction of portfolio in any single asset
-SELL_FRACTION: float       = 1.0    # Fraction of current holdings sold per SELL signal
 MIN_ORDER_VALUE_USD: float = 15.0   # Minimum USD value per order (buffer above MiniOrder=1)
 STOP_LOSS_PCT: float       = 0.03   # 3% drop from entry price triggers an immediate market sell
+REBALANCE_THRESHOLD: float = 0.02   # Min weight drift (2%) required to trigger a rebalance trade
 
 # ---------------------------------------------------------------------------
 # Commission Rates
@@ -77,12 +66,6 @@ LIMIT_ORDER_OFFSET: float = 0.001    # 0.1% offset
 LIMIT_ORDER_TIMEOUT: int = 120
 
 # ---------------------------------------------------------------------------
-# Signal Cooldown
-# Prevents re-entering the same signal direction for the same pair too quickly.
-# ---------------------------------------------------------------------------
-SIGNAL_COOLDOWN_SECONDS: int = 300  # 5 minutes
-
-# ---------------------------------------------------------------------------
 # Polling
 # ---------------------------------------------------------------------------
 POLL_INTERVAL_SECONDS: int = 10    # Seconds between price-poll cycles
@@ -100,10 +83,22 @@ RETRY_JITTER: float  = 0.5   # Uniform random fraction added to avoid thundering
 LOG_FILE:  str = "bot.log"
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 
-# --- Strategy Partitioning ---
-MOMENTUM_CAPITAL_SHARE: float = 0.5  # 50% of total equity
-EMA_CAPITAL_SHARE: float      = 0.5  # 50% of total equity
+# ---------------------------------------------------------------------------
+# Momentum Strategy — Signal Parameters
+# These mirror LongOnlyMomentumSignal.__init__ defaults; edit here, not there.
+# ---------------------------------------------------------------------------
+FAST_SPAN:            int   = 5            # Fast EMA span (bars)
+SLOW_SPAN:            int   = 20           # Slow EMA span (bars)
+VOL_SPAN:             int   = 250          # EWM vol / z-score span (bars)
+Z_SCORE_THRESHOLD:    float = 0.9          # Min z-score to qualify for selection
+TOP_N:                int   = 3            # Max simultaneous holdings
+TREND_FILTER_SPAN:    int   = 200          # Absolute-trend EMA span (bars)
+TARGET_VOL:           float = 0.40         # Target annualised portfolio volatility
+ANNUALIZATION_FACTOR: float = 365.0 * 6   # 4h bars → 6 bars/day × 365 days
 
-# --- 4-Hour Momentum Settings ---
-MOMENTUM_INTERVAL_SECONDS: int = 14400  # 4 hours (60 * 60 * 4)
-MOMENTUM_LOOKBACK_BARS: int    = 300    # Enough for 250 vol_span
+# ---------------------------------------------------------------------------
+# Momentum Strategy — Execution Settings
+# ---------------------------------------------------------------------------
+MOMENTUM_INTERVAL_SECONDS: int = 14400  # Rebalance every 4 hours
+MOMENTUM_LOOKBACK_BARS:    int = 300    # Rolling price-history window kept in memory
+MIN_WARMUP_BARS:           int = 250    # Bars required before signals are trusted (= VOL_SPAN)

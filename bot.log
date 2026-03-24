@@ -601,3 +601,692 @@
 2026-03-20 18:45:55 | INFO     | Bot                  | Cycle 100 done in 0.2s — next poll in 9.8s.
 2026-03-20 18:46:02 | INFO     | Bot                  | Shutdown signal received (SIGINT). Finishing current cycle…
 2026-03-20 18:46:05 | INFO     | Bot                  | Bot shut down cleanly after 100 cycle(s).
+2026-03-24 15:12:48 | INFO     | RoostooClient        | RoostooClient initialized with base URL: https://mock-api.roostoo.com
+2026-03-24 15:12:48 | INFO     | RoostooClient        | Trading client initialized and ready.
+2026-03-24 15:12:48 | INFO     | RoostooClient        | Fetching exchange info...
+2026-03-24 15:12:48 | INFO     | Bot                  | Active trading pairs (10): ['BTC/USD', 'ETH/USD', 'SOL/USD', 'BNB/USD', 'XRP/USD', 'ADA/USD', 'DOGE/USD', 'LINK/USD', 'AVAX/USD', 'SUI/USD']
+2026-03-24 15:12:48 | INFO     | RoostooClient        | Querying orders: order_id=None pair=None pending_only=TRUE offset=None limit=None
+2026-03-24 15:12:48 | INFO     | Bot                  | [SYNC]   No pre-existing open orders found.
+2026-03-24 15:12:48 | INFO     | Bot                  | Pre-loading 4-hour historical data...
+2026-03-24 15:12:48 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=BTC%2FUSD&interval=4h&limit=300
+2026-03-24 15:12:48 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=ETH%2FUSD&interval=4h&limit=300
+2026-03-24 15:12:48 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=SOL%2FUSD&interval=4h&limit=300
+2026-03-24 15:12:48 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=BNB%2FUSD&interval=4h&limit=300
+2026-03-24 15:12:48 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=XRP%2FUSD&interval=4h&limit=300
+2026-03-24 15:12:48 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=ADA%2FUSD&interval=4h&limit=300
+2026-03-24 15:12:48 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=DOGE%2FUSD&interval=4h&limit=300
+2026-03-24 15:12:48 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=LINK%2FUSD&interval=4h&limit=300
+2026-03-24 15:12:48 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=AVAX%2FUSD&interval=4h&limit=300
+2026-03-24 15:12:48 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=SUI%2FUSD&interval=4h&limit=300
+2026-03-24 15:12:49 | INFO     | Bot                  | ─── Executing 4-Hour Momentum Rebalance ───
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:12:49 | INFO     | Bot                  | [SIGNAL] BTC/USD      SELL | qty=0.012190 | last_price=70865.85000 | limit_price=70794.98415
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Placing LIMIT SELL BTC/USD  qty=0.01219  price=70794.98
+2026-03-24 15:12:49 | INFO     | RoostooClient        | ORDER_INIT: SELL 0.01219 BTC/USD (LIMIT)
+2026-03-24 15:12:49 | INFO     | RoostooClient        | ORDER_ACCEPTED: ID 2932352 | FILLED
+2026-03-24 15:12:49 | INFO     | Bot                  | [ORDER]  LIMIT SELL BTC/USD      | id=2932352      | qty=0.012190 | price=70794.98415
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/ticker | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/ticker?pair=AVAX%2FUSD&timestamp=1774336369440
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/ticker | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/ticker?pair=BNB%2FUSD&timestamp=1774336369449
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/ticker | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/ticker?pair=BTC%2FUSD&timestamp=1774336369458
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/ticker | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/ticker?pair=ETH%2FUSD&timestamp=1774336369469
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/ticker | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/ticker?pair=LINK%2FUSD&timestamp=1774336369477
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/ticker | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/ticker?pair=SOL%2FUSD&timestamp=1774336369488
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/ticker | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/ticker?pair=XRP%2FUSD&timestamp=1774336369500
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/balance | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369511
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | WARNING  | RoostooClient        | Balance fetch failed: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369511
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/balance | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369522
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | WARNING  | RoostooClient        | Balance fetch failed: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369522
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/balance | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369533
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | WARNING  | RoostooClient        | Balance fetch failed: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369533
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/balance | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369544
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | WARNING  | RoostooClient        | Balance fetch failed: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369544
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/balance | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369560
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | WARNING  | RoostooClient        | Balance fetch failed: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369560
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/balance | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369574
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | WARNING  | RoostooClient        | Balance fetch failed: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369574
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/ticker | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/ticker?pair=BNB%2FUSD&timestamp=1774336369616
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/ticker | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/ticker?pair=LINK%2FUSD&timestamp=1774336369649
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error: /v3/balance | Status: 429 | Msg: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369679
+2026-03-24 15:12:49 | ERROR    | RoostooClient        | API Error Response Body: reach rate limit, keep slower than 50 requests pre second
+2026-03-24 15:12:49 | WARNING  | RoostooClient        | Balance fetch failed: 429 Client Error: Too Many Requests for url: https://mock-api.roostoo.com/v3/balance?timestamp=1774336369679
+2026-03-24 15:12:49 | INFO     | Bot                  | Cycle 1 done in 0.9s — next poll in 9.1s.
+2026-03-24 15:12:59 | INFO     | Bot                  | Cycle 2 done in 0.2s — next poll in 9.8s.
+2026-03-24 15:13:09 | INFO     | Bot                  | Cycle 3 done in 0.3s — next poll in 9.7s.
+2026-03-24 15:13:19 | INFO     | Bot                  | Cycle 4 done in 0.3s — next poll in 9.7s.
+2026-03-24 15:13:29 | INFO     | Bot                  | Cycle 5 done in 0.3s — next poll in 9.7s.
+2026-03-24 15:13:39 | INFO     | Bot                  | Cycle 6 done in 0.3s — next poll in 9.7s.
+2026-03-24 15:13:49 | INFO     | Bot                  | Cycle 7 done in 0.3s — next poll in 9.7s.
+2026-03-24 15:13:59 | INFO     | Bot                  | Cycle 8 done in 0.4s — next poll in 9.6s.
+2026-03-24 15:14:09 | INFO     | Bot                  | Cycle 9 done in 0.3s — next poll in 9.7s.
+2026-03-24 15:43:08 | INFO     | RoostooClient        | RoostooClient initialized with base URL: https://mock-api.roostoo.com
+2026-03-24 15:43:08 | INFO     | RoostooClient        | Trading client initialized and ready.
+2026-03-24 15:43:08 | INFO     | RoostooClient        | Fetching exchange info...
+2026-03-24 15:43:09 | INFO     | Bot                  | Active trading pairs (10): ['BTC/USD', 'ETH/USD', 'SOL/USD', 'BNB/USD', 'XRP/USD', 'ADA/USD', 'DOGE/USD', 'LINK/USD', 'AVAX/USD', 'SUI/USD']
+2026-03-24 15:43:09 | INFO     | RoostooClient        | Querying orders: order_id=None pair=None pending_only=TRUE offset=None limit=None
+2026-03-24 15:43:09 | INFO     | Bot                  | [SYNC]   No pre-existing open orders found.
+2026-03-24 15:43:09 | INFO     | Bot                  | Pre-loading up to 300 bars of 4h candle data for 10 pairs…
+2026-03-24 15:43:09 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=BTC%2FUSD&interval=4h&limit=300
+2026-03-24 15:43:09 | WARNING  | Bot                  | [INIT]   No historical data returned for BTC/USD — will fill in live.
+2026-03-24 15:43:09 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=ETH%2FUSD&interval=4h&limit=300
+2026-03-24 15:43:09 | WARNING  | Bot                  | [INIT]   No historical data returned for ETH/USD — will fill in live.
+2026-03-24 15:43:09 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=SOL%2FUSD&interval=4h&limit=300
+2026-03-24 15:43:09 | WARNING  | Bot                  | [INIT]   No historical data returned for SOL/USD — will fill in live.
+2026-03-24 15:43:09 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=BNB%2FUSD&interval=4h&limit=300
+2026-03-24 15:43:09 | WARNING  | Bot                  | [INIT]   No historical data returned for BNB/USD — will fill in live.
+2026-03-24 15:43:09 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=XRP%2FUSD&interval=4h&limit=300
+2026-03-24 15:43:09 | WARNING  | Bot                  | [INIT]   No historical data returned for XRP/USD — will fill in live.
+2026-03-24 15:43:09 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=ADA%2FUSD&interval=4h&limit=300
+2026-03-24 15:43:09 | WARNING  | Bot                  | [INIT]   No historical data returned for ADA/USD — will fill in live.
+2026-03-24 15:43:09 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=DOGE%2FUSD&interval=4h&limit=300
+2026-03-24 15:43:09 | WARNING  | Bot                  | [INIT]   No historical data returned for DOGE/USD — will fill in live.
+2026-03-24 15:43:09 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=LINK%2FUSD&interval=4h&limit=300
+2026-03-24 15:43:09 | WARNING  | Bot                  | [INIT]   No historical data returned for LINK/USD — will fill in live.
+2026-03-24 15:43:09 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=AVAX%2FUSD&interval=4h&limit=300
+2026-03-24 15:43:09 | WARNING  | Bot                  | [INIT]   No historical data returned for AVAX/USD — will fill in live.
+2026-03-24 15:43:09 | ERROR    | RoostooClient        | API Error: /v3/klines | Status: 404 | Msg: 404 Client Error: Not Found for url: https://mock-api.roostoo.com/v3/klines?pair=SUI%2FUSD&interval=4h&limit=300
+2026-03-24 15:43:09 | WARNING  | Bot                  | [INIT]   No historical data returned for SUI/USD — will fill in live.
+2026-03-24 15:43:09 | WARNING  | Bot                  | [INIT]   No historical data loaded — momentum signals delayed until warmup.
+2026-03-24 15:43:09 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 15:43:09 | INFO     | Bot                  | [PORTFOLIO] Total=$42097.65 | Cash=$37783.37 | Positions=['AVAX', 'BNB', 'BTC', 'ETH', 'LINK', 'SOL', 'XRP']
+2026-03-24 15:43:09 | INFO     | Bot                  | ─── 4-Hour Momentum Rebalance (cycle 1) ───
+2026-03-24 15:43:09 | INFO     | Bot                  | [MOMENTUM] Insufficient history (1 bar(s)) — skipping rebalance.
+2026-03-24 15:43:09 | INFO     | Bot                  | Cycle 1 done in 0.1s — next poll in 9.9s.
+2026-03-24 15:43:19 | INFO     | Bot                  | Cycle 2 done in 0.2s — next poll in 9.8s.
+2026-03-24 15:43:29 | INFO     | Bot                  | Cycle 3 done in 0.2s — next poll in 9.8s.
+2026-03-24 15:43:39 | INFO     | Bot                  | Cycle 4 done in 0.1s — next poll in 9.9s.
+2026-03-24 15:43:43 | INFO     | Bot                  | Shutdown signal received (SIGINT). Finishing current cycle…
+2026-03-24 15:43:52 | INFO     | Bot                  | Bot shut down cleanly after 4 cycle(s).
+2026-03-24 16:03:12 | INFO     | RoostooClient        | RoostooClient initialized with base URL: https://mock-api.roostoo.com
+2026-03-24 16:03:12 | INFO     | RoostooClient        | Trading client initialized and ready.
+2026-03-24 16:03:12 | INFO     | RoostooClient        | Fetching exchange info...
+2026-03-24 16:03:12 | INFO     | Bot                  | Active trading pairs (10): ['BTC/USD', 'ETH/USD', 'SOL/USD', 'BNB/USD', 'XRP/USD', 'ADA/USD', 'DOGE/USD', 'LINK/USD', 'AVAX/USD', 'SUI/USD']
+2026-03-24 16:03:12 | INFO     | RoostooClient        | Querying orders: order_id=None pair=None pending_only=TRUE offset=None limit=None
+2026-03-24 16:03:12 | INFO     | Bot                  | [SYNC]   No pre-existing open orders found.
+2026-03-24 16:03:12 | INFO     | Bot                  | Seeding price history from Binance (300 bars × 10 pairs)…
+2026-03-24 16:03:12 | INFO     | RoostooClient        | [BINANCE SEED] BTC/USD  bars=300  latest_close=71227.7500
+2026-03-24 16:03:12 | INFO     | RoostooClient        | [BINANCE SEED] ETH/USD  bars=300  latest_close=2164.8200
+2026-03-24 16:03:13 | INFO     | RoostooClient        | [BINANCE SEED] SOL/USD  bars=300  latest_close=91.7200
+2026-03-24 16:03:13 | INFO     | RoostooClient        | [BINANCE SEED] BNB/USD  bars=300  latest_close=638.0100
+2026-03-24 16:03:13 | INFO     | RoostooClient        | [BINANCE SEED] XRP/USD  bars=300  latest_close=1.4289
+2026-03-24 16:03:13 | INFO     | RoostooClient        | [BINANCE SEED] ADA/USD  bars=300  latest_close=0.2667
+2026-03-24 16:03:13 | INFO     | RoostooClient        | [BINANCE SEED] DOGE/USD  bars=300  latest_close=0.0954
+2026-03-24 16:03:13 | INFO     | RoostooClient        | [BINANCE SEED] LINK/USD  bars=300  latest_close=9.2500
+2026-03-24 16:03:13 | INFO     | RoostooClient        | [BINANCE SEED] AVAX/USD  bars=300  latest_close=9.6000
+2026-03-24 16:03:14 | INFO     | RoostooClient        | [BINANCE SEED] SUI/USD  bars=300  latest_close=0.9581
+2026-03-24 16:03:14 | INFO     | Bot                  | [SEED]   Loaded 300 bars for 10 / 10 pairs.
+2026-03-24 16:03:14 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:03:14 | INFO     | Bot                  | [PORTFOLIO] Total=$42123.04 | Cash=$37783.37 | Positions=['AVAX', 'BNB', 'BTC', 'ETH', 'LINK', 'SOL', 'XRP']
+2026-03-24 16:03:14 | INFO     | Bot                  | ─── 4-Hour Momentum Rebalance (cycle 1) ───
+2026-03-24 16:03:14 | INFO     | Bot                  | [MOMENTUM] Target weights: all cash
+2026-03-24 16:03:14 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:03:14 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:03:14 | INFO     | Bot                  | [SIGNAL] ETH/USD      SELL | qty=0.402400 | last=2164.82000 | limit=2162.65518
+2026-03-24 16:03:14 | INFO     | RoostooClient        | Placing LIMIT SELL ETH/USD  qty=0.4024  price=2162.66
+2026-03-24 16:03:14 | INFO     | RoostooClient        | ORDER_INIT: SELL 0.4024 ETH/USD (LIMIT)
+2026-03-24 16:03:16 | INFO     | RoostooClient        | ORDER_ACCEPTED: ID 2933369 | FILLED
+2026-03-24 16:03:16 | INFO     | Bot                  | [ORDER]  LIMIT SELL ETH/USD      | id=2933369      | qty=0.402400 | price=2162.65518
+2026-03-24 16:03:16 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:03:16 | INFO     | Bot                  | [SIGNAL] SOL/USD      SELL | qty=9.608000 | last=91.72000 | limit=91.62828
+2026-03-24 16:03:16 | INFO     | RoostooClient        | Placing LIMIT SELL SOL/USD  qty=9.608  price=91.63
+2026-03-24 16:03:16 | INFO     | RoostooClient        | ORDER_INIT: SELL 9.608 SOL/USD (LIMIT)
+2026-03-24 16:03:18 | INFO     | RoostooClient        | ORDER_ACCEPTED: ID 2933370 | FILLED
+2026-03-24 16:03:18 | INFO     | Bot                  | [ORDER]  LIMIT SELL SOL/USD      | id=2933370      | qty=9.608000 | price=91.62828
+2026-03-24 16:03:18 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:03:18 | INFO     | Bot                  | [SIGNAL] BNB/USD      SELL | qty=1.329958 | last=638.01000 | limit=637.37199
+2026-03-24 16:03:18 | INFO     | RoostooClient        | Placing LIMIT SELL BNB/USD  qty=1.329  price=637.37
+2026-03-24 16:03:18 | INFO     | RoostooClient        | ORDER_INIT: SELL 1.329 BNB/USD (LIMIT)
+2026-03-24 16:03:20 | INFO     | RoostooClient        | ORDER_ACCEPTED: ID 2933372 | FILLED
+2026-03-24 16:03:20 | INFO     | Bot                  | [ORDER]  LIMIT SELL BNB/USD      | id=2933372      | qty=1.329958 | price=637.37199
+2026-03-24 16:03:20 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:03:20 | INFO     | Bot                  | [SIGNAL] XRP/USD      SELL | qty=601.100000 | last=1.42890 | limit=1.42747
+2026-03-24 16:03:20 | INFO     | RoostooClient        | Placing LIMIT SELL XRP/USD  qty=601.1  price=1.4275
+2026-03-24 16:03:20 | INFO     | RoostooClient        | ORDER_INIT: SELL 601.1 XRP/USD (LIMIT)
+2026-03-24 16:03:22 | INFO     | RoostooClient        | ORDER_ACCEPTED: ID 2933373 | FILLED
+2026-03-24 16:03:22 | INFO     | Bot                  | [ORDER]  LIMIT SELL XRP/USD      | id=2933373      | qty=601.100000 | price=1.42747
+2026-03-24 16:03:22 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:03:22 | INFO     | Bot                  | [SIGNAL] LINK/USD     SELL | qty=95.030000 | last=9.25000 | limit=9.24075
+2026-03-24 16:03:22 | INFO     | RoostooClient        | Placing LIMIT SELL LINK/USD  qty=95.03  price=9.24
+2026-03-24 16:03:22 | INFO     | RoostooClient        | ORDER_INIT: SELL 95.03 LINK/USD (LIMIT)
+2026-03-24 16:03:24 | INFO     | RoostooClient        | ORDER_ACCEPTED: ID 2933375 | FILLED
+2026-03-24 16:03:24 | INFO     | Bot                  | [ORDER]  LIMIT SELL LINK/USD     | id=2933375      | qty=95.030000 | price=9.24075
+2026-03-24 16:03:24 | INFO     | Bot                  | Cycle 1 done in 10.0s — next poll in 0.0s.
+2026-03-24 16:03:24 | INFO     | Bot                  | Cycle 2 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:03:34 | INFO     | Bot                  | Cycle 3 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:03:44 | INFO     | Bot                  | Cycle 4 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:03:54 | INFO     | Bot                  | Cycle 5 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:04:04 | INFO     | Bot                  | Cycle 6 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:04:14 | INFO     | Bot                  | Cycle 7 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:04:24 | INFO     | Bot                  | Cycle 8 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:04:34 | INFO     | Bot                  | Cycle 9 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:04:44 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:04:44 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.52 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:04:44 | INFO     | Bot                  | Cycle 10 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:04:54 | INFO     | Bot                  | Cycle 11 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:05:04 | INFO     | Bot                  | Cycle 12 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:05:14 | INFO     | Bot                  | Cycle 13 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:05:24 | INFO     | Bot                  | [STALE]  Cancelling order 2933369 for ETH/USD (timed out after 120s)
+2026-03-24 16:05:24 | INFO     | RoostooClient        | Cancelling order 2933369
+2026-03-24 16:05:24 | WARNING  | Bot                  | [CANCEL] Failed to cancel 2933369: no order canceled
+2026-03-24 16:05:24 | INFO     | Bot                  | [STALE]  Cancelling order 2933370 for SOL/USD (timed out after 120s)
+2026-03-24 16:05:24 | INFO     | RoostooClient        | Cancelling order 2933370
+2026-03-24 16:05:24 | WARNING  | Bot                  | [CANCEL] Failed to cancel 2933370: no order canceled
+2026-03-24 16:05:24 | INFO     | Bot                  | [STALE]  Cancelling order 2933372 for BNB/USD (timed out after 120s)
+2026-03-24 16:05:24 | INFO     | RoostooClient        | Cancelling order 2933372
+2026-03-24 16:05:24 | WARNING  | Bot                  | [CANCEL] Failed to cancel 2933372: no order canceled
+2026-03-24 16:05:24 | INFO     | Bot                  | [STALE]  Cancelling order 2933373 for XRP/USD (timed out after 120s)
+2026-03-24 16:05:24 | INFO     | RoostooClient        | Cancelling order 2933373
+2026-03-24 16:05:24 | WARNING  | Bot                  | [CANCEL] Failed to cancel 2933373: no order canceled
+2026-03-24 16:05:24 | INFO     | Bot                  | [STALE]  Cancelling order 2933375 for LINK/USD (timed out after 120s)
+2026-03-24 16:05:24 | INFO     | RoostooClient        | Cancelling order 2933375
+2026-03-24 16:05:24 | WARNING  | Bot                  | [CANCEL] Failed to cancel 2933375: no order canceled
+2026-03-24 16:05:24 | INFO     | Bot                  | Cycle 14 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:05:34 | INFO     | Bot                  | Cycle 15 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:05:44 | INFO     | Bot                  | Cycle 16 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:05:54 | INFO     | Bot                  | Cycle 17 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:06:04 | INFO     | Bot                  | Cycle 18 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:06:14 | INFO     | Bot                  | Cycle 19 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:06:24 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:06:24 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.52 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:06:24 | INFO     | Bot                  | Cycle 20 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:06:34 | INFO     | Bot                  | Cycle 21 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:06:44 | INFO     | Bot                  | Cycle 22 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:06:54 | INFO     | Bot                  | Cycle 23 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:07:04 | INFO     | Bot                  | Cycle 24 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:07:14 | INFO     | Bot                  | Cycle 25 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:07:24 | INFO     | Bot                  | Cycle 26 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:07:34 | INFO     | Bot                  | Cycle 27 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:07:44 | INFO     | Bot                  | Cycle 28 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:07:54 | INFO     | Bot                  | Cycle 29 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:08:04 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:08:04 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.52 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:08:04 | INFO     | Bot                  | Cycle 30 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:08:14 | INFO     | Bot                  | Cycle 31 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:08:24 | INFO     | Bot                  | Cycle 32 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:08:34 | INFO     | Bot                  | Cycle 33 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:08:44 | INFO     | Bot                  | Cycle 34 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:08:54 | INFO     | Bot                  | Cycle 35 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:09:04 | INFO     | Bot                  | Cycle 36 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:09:14 | INFO     | Bot                  | Cycle 37 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:09:24 | INFO     | Bot                  | Cycle 38 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:09:34 | INFO     | Bot                  | Cycle 39 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:09:44 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:09:44 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.52 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:09:44 | INFO     | Bot                  | Cycle 40 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:09:54 | INFO     | Bot                  | Cycle 41 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:10:04 | INFO     | Bot                  | Cycle 42 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:10:14 | INFO     | Bot                  | Cycle 43 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:10:24 | INFO     | Bot                  | Cycle 44 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:10:34 | INFO     | Bot                  | Cycle 45 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:10:44 | INFO     | Bot                  | Cycle 46 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:10:54 | INFO     | Bot                  | Cycle 47 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:11:04 | INFO     | Bot                  | Cycle 48 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:11:14 | INFO     | Bot                  | Cycle 49 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:11:25 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:11:25 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:11:25 | INFO     | Bot                  | Cycle 50 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:11:34 | INFO     | Bot                  | Cycle 51 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:11:45 | INFO     | Bot                  | Cycle 52 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:11:55 | INFO     | Bot                  | Cycle 53 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:12:04 | INFO     | Bot                  | Cycle 54 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:12:15 | INFO     | Bot                  | Cycle 55 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:12:25 | INFO     | Bot                  | Cycle 56 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:12:35 | INFO     | Bot                  | Cycle 57 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:12:45 | INFO     | Bot                  | Cycle 58 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:12:55 | INFO     | Bot                  | Cycle 59 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:13:05 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:13:05 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.52 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:13:05 | INFO     | Bot                  | Cycle 60 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:13:15 | INFO     | Bot                  | Cycle 61 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:13:25 | INFO     | Bot                  | Cycle 62 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:13:35 | INFO     | Bot                  | Cycle 63 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:13:45 | INFO     | Bot                  | Cycle 64 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:13:55 | INFO     | Bot                  | Cycle 65 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:14:05 | INFO     | Bot                  | Cycle 66 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:14:15 | INFO     | Bot                  | Cycle 67 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:14:25 | INFO     | Bot                  | Cycle 68 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:14:35 | INFO     | Bot                  | Cycle 69 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:14:45 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:14:45 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:14:45 | INFO     | Bot                  | Cycle 70 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:14:55 | INFO     | Bot                  | Cycle 71 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:15:05 | INFO     | Bot                  | Cycle 72 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:15:15 | INFO     | Bot                  | Cycle 73 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:15:25 | INFO     | Bot                  | Cycle 74 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:15:35 | INFO     | Bot                  | Cycle 75 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:15:45 | INFO     | Bot                  | Cycle 76 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:15:55 | INFO     | Bot                  | Cycle 77 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:16:05 | INFO     | Bot                  | Cycle 78 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:16:15 | INFO     | Bot                  | Cycle 79 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:16:25 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:16:25 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:16:25 | INFO     | Bot                  | Cycle 80 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:16:35 | INFO     | Bot                  | Cycle 81 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:16:45 | INFO     | Bot                  | Cycle 82 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:16:55 | INFO     | Bot                  | Cycle 83 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:17:05 | INFO     | Bot                  | Cycle 84 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:17:15 | INFO     | Bot                  | Cycle 85 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:17:25 | INFO     | Bot                  | Cycle 86 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:17:35 | INFO     | Bot                  | Cycle 87 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:17:45 | INFO     | Bot                  | Cycle 88 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:17:55 | INFO     | Bot                  | Cycle 89 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:18:05 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:18:05 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:18:05 | INFO     | Bot                  | Cycle 90 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:18:15 | INFO     | Bot                  | Cycle 91 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:18:25 | INFO     | Bot                  | Cycle 92 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:18:35 | INFO     | Bot                  | Cycle 93 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:18:45 | INFO     | Bot                  | Cycle 94 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:18:55 | INFO     | Bot                  | Cycle 95 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:19:05 | INFO     | Bot                  | Cycle 96 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:19:15 | INFO     | Bot                  | Cycle 97 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:19:25 | INFO     | Bot                  | Cycle 98 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:19:35 | INFO     | Bot                  | Cycle 99 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:19:45 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:19:45 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:19:45 | INFO     | Bot                  | Cycle 100 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:19:55 | INFO     | Bot                  | Cycle 101 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:20:05 | INFO     | Bot                  | Cycle 102 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:20:15 | INFO     | Bot                  | Cycle 103 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:20:25 | INFO     | Bot                  | Cycle 104 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:20:35 | INFO     | Bot                  | Cycle 105 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:20:45 | INFO     | Bot                  | Cycle 106 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:20:55 | INFO     | Bot                  | Cycle 107 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:21:05 | INFO     | Bot                  | Cycle 108 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:21:15 | INFO     | Bot                  | Cycle 109 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:21:25 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:21:25 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:21:25 | INFO     | Bot                  | Cycle 110 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:21:35 | INFO     | Bot                  | Cycle 111 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:21:45 | INFO     | Bot                  | Cycle 112 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:21:55 | INFO     | Bot                  | Cycle 113 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:22:05 | INFO     | Bot                  | Cycle 114 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:22:15 | INFO     | Bot                  | Cycle 115 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:22:25 | INFO     | Bot                  | Cycle 116 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:22:35 | INFO     | Bot                  | Cycle 117 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:22:45 | INFO     | Bot                  | Cycle 118 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:22:55 | INFO     | Bot                  | Cycle 119 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:23:05 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:23:05 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:23:05 | INFO     | Bot                  | Cycle 120 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:23:15 | INFO     | Bot                  | Cycle 121 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:23:25 | INFO     | Bot                  | Cycle 122 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:23:35 | INFO     | Bot                  | Cycle 123 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:23:45 | INFO     | Bot                  | Cycle 124 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:23:55 | INFO     | Bot                  | Cycle 125 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:24:05 | INFO     | Bot                  | Cycle 126 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:24:15 | INFO     | Bot                  | Cycle 127 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:24:25 | INFO     | Bot                  | Cycle 128 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:24:35 | INFO     | Bot                  | Cycle 129 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:24:45 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:24:45 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:24:45 | INFO     | Bot                  | Cycle 130 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:24:55 | INFO     | Bot                  | Cycle 131 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:25:05 | INFO     | Bot                  | Cycle 132 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:25:15 | INFO     | Bot                  | Cycle 133 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:25:25 | INFO     | Bot                  | Cycle 134 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:25:35 | INFO     | Bot                  | Cycle 135 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:25:45 | INFO     | Bot                  | Cycle 136 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:25:55 | INFO     | Bot                  | Cycle 137 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:26:05 | INFO     | Bot                  | Cycle 138 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:26:15 | INFO     | Bot                  | Cycle 139 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:26:25 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:26:25 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:26:25 | INFO     | Bot                  | Cycle 140 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:26:35 | INFO     | Bot                  | Cycle 141 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:26:45 | INFO     | Bot                  | Cycle 142 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:26:55 | INFO     | Bot                  | Cycle 143 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:27:05 | INFO     | Bot                  | Cycle 144 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:27:15 | INFO     | Bot                  | Cycle 145 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:27:25 | INFO     | Bot                  | Cycle 146 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:27:35 | INFO     | Bot                  | Cycle 147 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:27:45 | INFO     | Bot                  | Cycle 148 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:27:55 | INFO     | Bot                  | Cycle 149 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:28:05 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:28:05 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:28:05 | INFO     | Bot                  | Cycle 150 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:28:15 | INFO     | Bot                  | Cycle 151 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:28:25 | INFO     | Bot                  | Cycle 152 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:28:35 | INFO     | Bot                  | Cycle 153 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:28:45 | INFO     | Bot                  | Cycle 154 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:28:56 | INFO     | Bot                  | Cycle 155 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:29:05 | INFO     | Bot                  | Cycle 156 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:29:15 | INFO     | Bot                  | Cycle 157 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:29:25 | INFO     | Bot                  | Cycle 158 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:29:35 | INFO     | Bot                  | Cycle 159 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:29:45 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:29:46 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:29:46 | INFO     | Bot                  | Cycle 160 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:29:55 | INFO     | Bot                  | Cycle 161 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:30:06 | INFO     | Bot                  | Cycle 162 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:30:16 | INFO     | Bot                  | Cycle 163 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:30:26 | INFO     | Bot                  | Cycle 164 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:30:36 | INFO     | Bot                  | Cycle 165 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:30:46 | INFO     | Bot                  | Cycle 166 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:30:56 | INFO     | Bot                  | Cycle 167 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:31:06 | INFO     | Bot                  | Cycle 168 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:31:16 | INFO     | Bot                  | Cycle 169 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:31:26 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:31:26 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:31:26 | INFO     | Bot                  | Cycle 170 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:31:36 | INFO     | Bot                  | Cycle 171 done in 0.4s — next poll in 9.6s.
+2026-03-24 16:31:46 | INFO     | Bot                  | Cycle 172 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:31:56 | INFO     | Bot                  | Cycle 173 done in 0.5s — next poll in 9.5s.
+2026-03-24 16:32:06 | INFO     | Bot                  | Cycle 174 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:32:16 | INFO     | Bot                  | Cycle 175 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:32:26 | INFO     | Bot                  | Cycle 176 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:32:36 | INFO     | Bot                  | Cycle 177 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:32:46 | INFO     | Bot                  | Cycle 178 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:32:56 | INFO     | Bot                  | Cycle 179 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:33:06 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:33:06 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:33:06 | INFO     | Bot                  | Cycle 180 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:33:16 | INFO     | Bot                  | Cycle 181 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:33:26 | INFO     | Bot                  | Cycle 182 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:33:36 | INFO     | Bot                  | Cycle 183 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:33:46 | INFO     | Bot                  | Cycle 184 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:33:56 | INFO     | Bot                  | Cycle 185 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:34:06 | INFO     | Bot                  | Cycle 186 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:34:16 | INFO     | Bot                  | Cycle 187 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:34:26 | INFO     | Bot                  | Cycle 188 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:34:36 | INFO     | Bot                  | Cycle 189 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:34:46 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:34:46 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:34:46 | INFO     | Bot                  | Cycle 190 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:34:56 | INFO     | Bot                  | Cycle 191 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:35:06 | INFO     | Bot                  | Cycle 192 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:35:16 | INFO     | Bot                  | Cycle 193 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:35:26 | INFO     | Bot                  | Cycle 194 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:35:36 | INFO     | Bot                  | Cycle 195 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:35:46 | INFO     | Bot                  | Cycle 196 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:35:56 | INFO     | Bot                  | Cycle 197 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:36:06 | INFO     | Bot                  | Cycle 198 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:36:16 | INFO     | Bot                  | Cycle 199 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:36:26 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:36:26 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:36:26 | INFO     | Bot                  | Cycle 200 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:36:36 | INFO     | Bot                  | Cycle 201 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:36:46 | INFO     | Bot                  | Cycle 202 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:36:56 | INFO     | Bot                  | Cycle 203 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:37:06 | INFO     | Bot                  | Cycle 204 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:37:16 | INFO     | Bot                  | Cycle 205 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:37:27 | INFO     | Bot                  | Cycle 206 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:37:36 | INFO     | Bot                  | Cycle 207 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:37:46 | INFO     | Bot                  | Cycle 208 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:37:56 | INFO     | Bot                  | Cycle 209 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:38:06 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:38:07 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:38:07 | INFO     | Bot                  | Cycle 210 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:38:16 | INFO     | Bot                  | Cycle 211 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:38:26 | INFO     | Bot                  | Cycle 212 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:38:36 | INFO     | Bot                  | Cycle 213 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:38:46 | INFO     | Bot                  | Cycle 214 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:38:57 | INFO     | Bot                  | Cycle 215 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:39:07 | INFO     | Bot                  | Cycle 216 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:39:17 | INFO     | Bot                  | Cycle 217 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:39:27 | INFO     | Bot                  | Cycle 218 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:39:37 | INFO     | Bot                  | Cycle 219 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:39:47 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:39:47 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:39:47 | INFO     | Bot                  | Cycle 220 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:39:57 | INFO     | Bot                  | Cycle 221 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:40:07 | INFO     | Bot                  | Cycle 222 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:40:17 | INFO     | Bot                  | Cycle 223 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:40:27 | INFO     | Bot                  | Cycle 224 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:40:37 | INFO     | Bot                  | Cycle 225 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:40:47 | INFO     | Bot                  | Cycle 226 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:40:57 | INFO     | Bot                  | Cycle 227 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:41:07 | INFO     | Bot                  | Cycle 228 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:41:17 | INFO     | Bot                  | Cycle 229 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:41:27 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:41:27 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:41:27 | INFO     | Bot                  | Cycle 230 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:41:37 | INFO     | Bot                  | Cycle 231 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:41:47 | INFO     | Bot                  | Cycle 232 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:41:57 | INFO     | Bot                  | Cycle 233 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:42:07 | INFO     | Bot                  | Cycle 234 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:42:17 | INFO     | Bot                  | Cycle 235 done in 0.7s — next poll in 9.3s.
+2026-03-24 16:42:27 | INFO     | Bot                  | Cycle 236 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:42:37 | INFO     | Bot                  | Cycle 237 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:42:47 | INFO     | Bot                  | Cycle 238 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:42:57 | INFO     | Bot                  | Cycle 239 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:43:07 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:43:07 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:43:07 | INFO     | Bot                  | Cycle 240 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:43:17 | INFO     | Bot                  | Cycle 241 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:43:27 | INFO     | Bot                  | Cycle 242 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:43:37 | INFO     | Bot                  | Cycle 243 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:43:47 | INFO     | Bot                  | Cycle 244 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:43:57 | INFO     | Bot                  | Cycle 245 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:44:07 | INFO     | Bot                  | Cycle 246 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:44:17 | INFO     | Bot                  | Cycle 247 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:44:27 | INFO     | Bot                  | Cycle 248 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:44:37 | INFO     | Bot                  | Cycle 249 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:44:47 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:44:47 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:44:47 | INFO     | Bot                  | Cycle 250 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:44:57 | INFO     | Bot                  | Cycle 251 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:45:07 | INFO     | Bot                  | Cycle 252 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:45:17 | INFO     | Bot                  | Cycle 253 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:45:27 | INFO     | Bot                  | Cycle 254 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:45:37 | INFO     | Bot                  | Cycle 255 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:45:47 | INFO     | Bot                  | Cycle 256 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:45:57 | INFO     | Bot                  | Cycle 257 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:46:07 | INFO     | Bot                  | Cycle 258 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:46:17 | INFO     | Bot                  | Cycle 259 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:46:27 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:46:27 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:46:27 | INFO     | Bot                  | Cycle 260 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:46:37 | INFO     | Bot                  | Cycle 261 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:46:47 | INFO     | Bot                  | Cycle 262 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:46:57 | INFO     | Bot                  | Cycle 263 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:47:07 | INFO     | Bot                  | Cycle 264 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:47:17 | INFO     | Bot                  | Cycle 265 done in 0.5s — next poll in 9.5s.
+2026-03-24 16:47:27 | INFO     | Bot                  | Cycle 266 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:47:37 | INFO     | Bot                  | Cycle 267 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:47:47 | INFO     | Bot                  | Cycle 268 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:47:57 | INFO     | Bot                  | Cycle 269 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:48:07 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:48:07 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:48:07 | INFO     | Bot                  | Cycle 270 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:48:17 | INFO     | Bot                  | Cycle 271 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:48:27 | INFO     | Bot                  | Cycle 272 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:48:37 | INFO     | Bot                  | Cycle 273 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:48:47 | INFO     | Bot                  | Cycle 274 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:48:57 | INFO     | Bot                  | Cycle 275 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:49:07 | INFO     | Bot                  | Cycle 276 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:49:17 | INFO     | Bot                  | Cycle 277 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:49:27 | INFO     | Bot                  | Cycle 278 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:49:37 | INFO     | Bot                  | Cycle 279 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:49:47 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:49:47 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:49:47 | INFO     | Bot                  | Cycle 280 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:49:57 | INFO     | Bot                  | Cycle 281 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:50:07 | INFO     | Bot                  | Cycle 282 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:50:17 | INFO     | Bot                  | Cycle 283 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:50:27 | INFO     | Bot                  | Cycle 284 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:50:37 | INFO     | Bot                  | Cycle 285 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:50:47 | INFO     | Bot                  | Cycle 286 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:50:57 | INFO     | Bot                  | Cycle 287 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:51:07 | INFO     | Bot                  | Cycle 288 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:51:17 | INFO     | Bot                  | Cycle 289 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:51:27 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:51:27 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:51:27 | INFO     | Bot                  | Cycle 290 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:51:37 | INFO     | Bot                  | Cycle 291 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:51:47 | INFO     | Bot                  | Cycle 292 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:51:57 | INFO     | Bot                  | Cycle 293 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:52:07 | INFO     | Bot                  | Cycle 294 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:52:17 | INFO     | Bot                  | Cycle 295 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:52:27 | INFO     | Bot                  | Cycle 296 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:52:37 | INFO     | Bot                  | Cycle 297 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:52:47 | INFO     | Bot                  | Cycle 298 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:52:57 | INFO     | Bot                  | Cycle 299 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:53:07 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:53:07 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:53:07 | INFO     | Bot                  | Cycle 300 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:53:17 | INFO     | Bot                  | Cycle 301 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:53:27 | INFO     | Bot                  | Cycle 302 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:53:37 | INFO     | Bot                  | Cycle 303 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:53:47 | INFO     | Bot                  | Cycle 304 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:53:57 | INFO     | Bot                  | Cycle 305 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:54:07 | INFO     | Bot                  | Cycle 306 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:54:17 | INFO     | Bot                  | Cycle 307 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:54:27 | INFO     | Bot                  | Cycle 308 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:54:37 | INFO     | Bot                  | Cycle 309 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:54:47 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:54:48 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:54:48 | INFO     | Bot                  | Cycle 310 done in 0.3s — next poll in 9.7s.
+2026-03-24 16:54:57 | INFO     | Bot                  | Cycle 311 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:55:07 | INFO     | Bot                  | Cycle 312 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:55:17 | INFO     | Bot                  | Cycle 313 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:55:27 | INFO     | Bot                  | Cycle 314 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:55:37 | INFO     | Bot                  | Cycle 315 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:55:47 | INFO     | Bot                  | Cycle 316 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:55:57 | INFO     | Bot                  | Cycle 317 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:56:08 | INFO     | Bot                  | Cycle 318 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:56:18 | INFO     | Bot                  | Cycle 319 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:56:27 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:56:28 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:56:28 | INFO     | Bot                  | Cycle 320 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:56:38 | INFO     | Bot                  | Cycle 321 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:56:48 | INFO     | Bot                  | Cycle 322 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:56:58 | INFO     | Bot                  | Cycle 323 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:57:08 | INFO     | Bot                  | Cycle 324 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:57:18 | INFO     | Bot                  | Cycle 325 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:57:28 | INFO     | Bot                  | Cycle 326 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:57:38 | INFO     | Bot                  | Cycle 327 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:57:48 | INFO     | Bot                  | Cycle 328 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:57:58 | INFO     | Bot                  | Cycle 329 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:58:08 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:58:08 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:58:08 | INFO     | Bot                  | Cycle 330 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:58:18 | INFO     | Bot                  | Cycle 331 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:58:28 | INFO     | Bot                  | Cycle 332 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:58:38 | INFO     | Bot                  | Cycle 333 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:58:48 | INFO     | Bot                  | Cycle 334 done in 0.1s — next poll in 9.9s.
+2026-03-24 16:58:58 | INFO     | Bot                  | Cycle 335 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:59:08 | INFO     | Bot                  | Cycle 336 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:59:18 | INFO     | Bot                  | Cycle 337 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:59:28 | INFO     | Bot                  | Cycle 338 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:59:38 | INFO     | Bot                  | Cycle 339 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:59:48 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 16:59:48 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 16:59:48 | INFO     | Bot                  | Cycle 340 done in 0.2s — next poll in 9.8s.
+2026-03-24 16:59:58 | INFO     | Bot                  | Cycle 341 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:00:08 | INFO     | Bot                  | Cycle 342 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:00:18 | INFO     | Bot                  | Cycle 343 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:00:28 | INFO     | Bot                  | Cycle 344 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:00:38 | INFO     | Bot                  | Cycle 345 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:00:48 | INFO     | Bot                  | Cycle 346 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:00:58 | INFO     | Bot                  | Cycle 347 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:01:08 | INFO     | Bot                  | Cycle 348 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:01:18 | INFO     | Bot                  | Cycle 349 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:01:28 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 17:01:28 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 17:01:28 | INFO     | Bot                  | Cycle 350 done in 0.4s — next poll in 9.6s.
+2026-03-24 17:01:38 | INFO     | Bot                  | Cycle 351 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:01:48 | INFO     | Bot                  | Cycle 352 done in 0.1s — next poll in 9.9s.
+2026-03-24 17:01:58 | INFO     | Bot                  | Cycle 353 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:02:08 | INFO     | Bot                  | Cycle 354 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:02:18 | INFO     | Bot                  | Cycle 355 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:02:28 | INFO     | Bot                  | Cycle 356 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:02:38 | INFO     | Bot                  | Cycle 357 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:02:48 | INFO     | Bot                  | Cycle 358 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:02:58 | INFO     | Bot                  | Cycle 359 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:03:08 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 17:03:08 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 17:03:08 | INFO     | Bot                  | Cycle 360 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:03:18 | INFO     | Bot                  | Cycle 361 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:03:28 | INFO     | Bot                  | Cycle 362 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:03:38 | INFO     | Bot                  | Cycle 363 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:03:48 | INFO     | Bot                  | Cycle 364 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:03:58 | INFO     | Bot                  | Cycle 365 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:04:08 | INFO     | Bot                  | Cycle 366 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:04:18 | INFO     | Bot                  | Cycle 367 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:04:28 | INFO     | Bot                  | Cycle 368 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:04:38 | INFO     | Bot                  | Cycle 369 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:04:48 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 17:04:48 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 17:04:48 | INFO     | Bot                  | Cycle 370 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:04:58 | INFO     | Bot                  | Cycle 371 done in 0.1s — next poll in 9.9s.
+2026-03-24 17:05:08 | INFO     | Bot                  | Cycle 372 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:05:18 | INFO     | Bot                  | Cycle 373 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:05:28 | INFO     | Bot                  | Cycle 374 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:05:38 | INFO     | Bot                  | Cycle 375 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:05:48 | INFO     | Bot                  | Cycle 376 done in 0.4s — next poll in 9.6s.
+2026-03-24 17:05:58 | INFO     | Bot                  | Cycle 377 done in 0.1s — next poll in 9.9s.
+2026-03-24 17:06:08 | INFO     | Bot                  | Cycle 378 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:06:18 | INFO     | Bot                  | Cycle 379 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:06:28 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 17:06:28 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 17:06:28 | INFO     | Bot                  | Cycle 380 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:06:38 | INFO     | Bot                  | Cycle 381 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:06:48 | INFO     | Bot                  | Cycle 382 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:06:58 | INFO     | Bot                  | Cycle 383 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:07:08 | INFO     | Bot                  | Cycle 384 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:07:18 | INFO     | Bot                  | Cycle 385 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:07:28 | INFO     | Bot                  | Cycle 386 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:07:38 | INFO     | Bot                  | Cycle 387 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:07:48 | INFO     | Bot                  | Cycle 388 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:07:58 | INFO     | Bot                  | Cycle 389 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:08:08 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 17:08:08 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 17:08:08 | INFO     | Bot                  | Cycle 390 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:08:18 | INFO     | Bot                  | Cycle 391 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:08:28 | INFO     | Bot                  | Cycle 392 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:08:39 | INFO     | Bot                  | Cycle 393 done in 0.4s — next poll in 9.6s.
+2026-03-24 17:08:48 | INFO     | Bot                  | Cycle 394 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:08:58 | INFO     | Bot                  | Cycle 395 done in 0.1s — next poll in 9.9s.
+2026-03-24 17:09:08 | INFO     | Bot                  | Cycle 396 done in 0.1s — next poll in 9.9s.
+2026-03-24 17:09:18 | INFO     | Bot                  | Cycle 397 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:09:28 | INFO     | Bot                  | Cycle 398 done in 0.1s — next poll in 9.9s.
+2026-03-24 17:09:38 | INFO     | Bot                  | Cycle 399 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:09:48 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 17:09:49 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 17:09:49 | INFO     | Bot                  | Cycle 400 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:09:58 | INFO     | Bot                  | Cycle 401 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:10:08 | INFO     | Bot                  | Cycle 402 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:10:18 | INFO     | Bot                  | Cycle 403 done in 0.1s — next poll in 9.9s.
+2026-03-24 17:10:28 | INFO     | Bot                  | Cycle 404 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:10:38 | INFO     | Bot                  | Cycle 405 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:10:48 | INFO     | Bot                  | Cycle 406 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:10:58 | INFO     | Bot                  | Cycle 407 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:11:08 | INFO     | Bot                  | Cycle 408 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:11:18 | INFO     | Bot                  | Cycle 409 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:11:29 | INFO     | RoostooClient        | Requesting account balance...
+2026-03-24 17:11:29 | INFO     | Bot                  | [PORTFOLIO] Total=$42117.51 | Cash=$42116.07 | Positions=['AVAX', 'BNB', 'BTC']
+2026-03-24 17:11:29 | INFO     | Bot                  | Cycle 410 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:11:39 | INFO     | Bot                  | Cycle 411 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:11:49 | INFO     | Bot                  | Cycle 412 done in 0.1s — next poll in 9.9s.
+2026-03-24 17:11:59 | INFO     | Bot                  | Cycle 413 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:12:09 | INFO     | Bot                  | Cycle 414 done in 0.1s — next poll in 9.9s.
+2026-03-24 17:12:19 | INFO     | Bot                  | Cycle 415 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:12:29 | INFO     | Bot                  | Cycle 416 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:12:39 | INFO     | Bot                  | Cycle 417 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:12:49 | INFO     | Bot                  | Cycle 418 done in 0.2s — next poll in 9.8s.
+2026-03-24 17:12:59 | INFO     | Bot                  | Cycle 419 done in 0.2s — next poll in 9.8s.

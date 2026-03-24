@@ -19,19 +19,18 @@ from __future__ import annotations
 
 import argparse
 import signal as _signal
-import sys
 import time
 import pandas as pd
 
-# ── Configure logging FIRST so our root-logger setup wins over the
-#    logging.basicConfig() call inside client.py ──────────────────────────
+# ── Configure logging FIRST so our root-logger setup wins ───────────────────
 from logger import get_logger
 
 logger = get_logger("Bot")
 
-from client       import RoostooClient
-from strategy     import EMACrossoverStrategy, Signal
-from risk_manager import RiskManager
+from client                import RoostooClient
+from strategy              import Signal
+from risk_manager          import RiskManager
+from signals.long_momentum import LongOnlyMomentumSignal
 import config as cfg
 
 
@@ -53,57 +52,55 @@ def _handle_shutdown(sig: int, frame) -> None:  # type: ignore[type-arg]
 
 
 # ---------------------------------------------------------------------------
-# Order execution
+# Order execution  (weight-based — quantity computed by caller)
 # ---------------------------------------------------------------------------
 
-def _execute_signal(
-    api:     RoostooClient,
-    risk:    RiskManager,
-    pair:    str,
-    sig:     Signal,
-    price:   float,
-    dry_run: bool,
+def _execute_order(
+    api:      RoostooClient,
+    risk:     RiskManager,
+    pair:     str,
+    side:     Signal,
+    quantity: float,
+    price:    float,
+    dry_run:  bool,
 ) -> None:
-    """Run risk checks, then try a limit order with a market-order fallback."""
-    can_trade, reason, quantity = risk.check(pair, sig, price)
+    """Validate quantity via risk checks, then place a limit order with market fallback."""
+    can_trade, reason, final_qty = risk.check_order(pair, side, quantity, price)
 
     if not can_trade:
-        logger.info("[SKIP]   %-12s %-4s — %s", pair, sig.value, reason)
+        logger.info("[SKIP]   %-12s %-4s — %s", pair, side.value, reason)
         return
 
-    # Limit price: nudge slightly away from market to improve fill probability
-    if sig == Signal.BUY:
+    # Nudge limit price slightly to improve fill probability
+    if side == Signal.BUY:
         limit_price = price * (1.0 + cfg.LIMIT_ORDER_OFFSET)
     else:
         limit_price = price * (1.0 - cfg.LIMIT_ORDER_OFFSET)
 
     logger.info(
-        "[SIGNAL] %-12s %-4s | qty=%.6f | last_price=%.5f | limit_price=%.5f",
-        pair, sig.value, quantity, price, limit_price,
+        "[SIGNAL] %-12s %-4s | qty=%.6f | last=%.5f | limit=%.5f",
+        pair, side.value, final_qty, price, limit_price,
     )
 
     if dry_run:
         logger.info("[DRY RUN] Order not sent — simulation only.")
-        # Record the signal so cooldown logic works in dry-run mode too
-        risk.record_signal(pair, sig)
         return
 
     # ── Attempt limit order ─────────────────────────────────────────────
-    if sig == Signal.BUY:
-        result = api.place_limit_buy(pair, quantity, limit_price)
+    if side == Signal.BUY:
+        result = api.place_limit_buy(pair, final_qty, limit_price)
     else:
-        result = api.place_limit_sell(pair, quantity, limit_price)
+        result = api.place_limit_sell(pair, final_qty, limit_price)
 
     if result.get("Success"):
         detail   = result.get("OrderDetail") or {}
         order_id = str(detail.get("OrderID", "unknown"))
         logger.info(
             "[ORDER]  LIMIT %-4s %-12s | id=%-12s | qty=%.6f | price=%.5f",
-            sig.value, pair, order_id, quantity, limit_price,
+            side.value, pair, order_id, final_qty, limit_price,
         )
-        risk.record_signal(pair, sig)
         risk.track_order(pair, order_id, "LIMIT")
-        if sig == Signal.BUY:
+        if side == Signal.BUY:
             risk.record_entry(pair, price)
         else:
             risk.clear_entry(pair)
@@ -111,24 +108,21 @@ def _execute_signal(
 
     # ── Limit order failed → fall back to market order ──────────────────
     err = result.get("ErrMsg") or result.get("error") or "unknown error"
-    logger.warning(
-        "[WARN]   Limit order failed for %s (%s) — attempting market order.", pair, err
-    )
+    logger.warning("[WARN]   Limit order failed for %s (%s) — attempting market order.", pair, err)
 
-    if sig == Signal.BUY:
-        market_result = api.place_market_buy(pair, quantity)
+    if side == Signal.BUY:
+        market_result = api.place_market_buy(pair, final_qty)
     else:
-        market_result = api.place_market_sell(pair, quantity)
+        market_result = api.place_market_sell(pair, final_qty)
 
     if market_result.get("Success"):
         detail   = market_result.get("OrderDetail") or {}
         order_id = str(detail.get("OrderID", "unknown"))
         logger.info(
             "[ORDER]  MARKET %-4s %-12s | id=%-12s | qty=%.6f",
-            sig.value, pair, order_id, quantity,
+            side.value, pair, order_id, final_qty,
         )
-        risk.record_signal(pair, sig)
-        if sig == Signal.BUY:
+        if side == Signal.BUY:
             risk.record_entry(pair, price)
         else:
             risk.clear_entry(pair)
@@ -177,7 +171,6 @@ def _execute_stop_loss(
             pair, order_id, quantity, price,
         )
         risk.clear_entry(pair)
-        risk.record_signal(pair, Signal.SELL)   # start cooldown so we don't re-buy immediately
     else:
         err = result.get("ErrMsg") or result.get("error") or "unknown"
         logger.error("[STOP-LOSS] Market sell FAILED for %s: %s — will retry next cycle.", pair, err)
@@ -231,10 +224,7 @@ def _log_portfolio(api: RoostooClient) -> None:
 # ---------------------------------------------------------------------------
 
 def _validate_pairs(api: RoostooClient, pairs: list[str]) -> list[str]:
-    """
-    Filter the configured pair list to those that actually exist on the
-    exchange and have CanTrade=True.
-    """
+    """Filter configured pairs to those that exist and have CanTrade=True."""
     valid   = [p for p in pairs if api.validate_pair(p)]
     skipped = sorted(set(pairs) - set(valid))
     if skipped:
@@ -244,10 +234,7 @@ def _validate_pairs(api: RoostooClient, pairs: list[str]) -> list[str]:
 
 
 def _sync_open_orders(api: RoostooClient, risk: RiskManager) -> None:
-    """
-    On startup, fetch any open orders left from a previous run and register
-    them with the risk manager so they are subject to stale-order cleanup.
-    """
+    """Register any open orders from a previous run with the risk manager."""
     orders = api.get_open_orders()
     if not orders:
         logger.info("[SYNC]   No pre-existing open orders found.")
@@ -259,108 +246,206 @@ def _sync_open_orders(api: RoostooClient, risk: RiskManager) -> None:
             risk.track_order(pair, order_id, "LIMIT")
             logger.info("[SYNC]   Registered pre-existing order: %s  id=%s", pair, order_id)
 
-def _process_ema_signals(api, risk, strategy, current_prices, dry_run):
-    """Processes the 10s EMA crossover strategy using 50% capital."""
-    for pair, price in current_prices.items():
-        # Stop-loss check (Global priority)
-        if risk.check_stop_loss(pair, price):
-            _execute_stop_loss(api, risk, pair, price, dry_run)
-            continue
 
-        sig = strategy.update(pair, price)
-        if sig != Signal.HOLD:
-            # Use cfg.EMA_CAPITAL_SHARE (0.5)
-            can_trade, reason, qty = risk.check(pair, sig, price, share=cfg.EMA_CAPITAL_SHARE)
-            if can_trade:
-                _execute_signal(api, risk, pair, sig, price, dry_run)
+def _seed_price_history(api: RoostooClient, pairs: list[str]) -> pd.DataFrame:
+    """
+    Pre-load price_history from Binance's public API so the momentum strategy
+    is fully warmed up from the very first rebalance.
 
-def _process_momentum_rebalance(api, risk, strategy, current_prices, price_history, dry_run):
-    """Processes the 4-hour cross-sectional momentum using 50% capital."""
-    # Update the historical buffer with the latest 4H close
-    new_row = pd.DataFrame([current_prices], index=[pd.Timestamp.now()])
-    price_history = pd.concat([price_history, new_row]).tail(300)
-
-    # Generate cross-sectional weights
-    target_weights = strategy.generate_weights(price_history).iloc[-1]
-    
-    for pair, weight in target_weights.items():
-        price = current_prices.get(pair)
-        if not price: continue
-
-        # Logic: If weight > 0, ensure we have a position. If weight == 0, exit.
-        if weight > 0:
-            # Check risk with cfg.MOMENTUM_CAPITAL_SHARE (0.5)
-            can_trade, reason, qty = risk.check(pair, Signal.BUY, price, share=cfg.MOMENTUM_CAPITAL_SHARE)
-            if can_trade:
-                _execute_signal(api, risk, pair, Signal.BUY, price, dry_run)
+    Falls back gracefully — pairs with no Binance data start with NaN and
+    fill in from live prices over time.
+    """
+    logger.info(
+        "Seeding price history from Binance (%d bars × %d pairs)…",
+        cfg.MOMENTUM_LOOKBACK_BARS, len(pairs),
+    )
+    frames: list[pd.Series] = []
+    for pair in pairs:
+        series = api.get_binance_history(pair, interval="4h", limit=cfg.MOMENTUM_LOOKBACK_BARS)
+        if not series.empty:
+            frames.append(series)
         else:
-            # Exit position if momentum falls out of Top N or Z-score drops
-            can_trade, reason, qty = risk.check(pair, Signal.SELL, price, share=cfg.MOMENTUM_CAPITAL_SHARE)
-            if can_trade:
-                _execute_signal(api, risk, pair, Signal.SELL, price, dry_run)                
+            logger.warning("[SEED]   No Binance history for %s — will fill from live prices.", pair)
+
+    if not frames:
+        logger.warning("[SEED]   No historical data loaded for any pair — signals delayed until warmup.")
+        return pd.DataFrame()
+
+    price_history = pd.concat(frames, axis=1)
+    price_history.columns = [s.name for s in frames]
+    # Ensure all configured pairs are present (fill missing with NaN)
+    for pair in pairs:
+        if pair not in price_history.columns:
+            price_history[pair] = float("nan")
+
+    logger.info(
+        "[SEED]   Loaded %d bars for %d / %d pairs.",
+        len(price_history), len(frames), len(pairs),
+    )
+    return price_history
+
+
+# ---------------------------------------------------------------------------
+# Momentum rebalance
+# ---------------------------------------------------------------------------
+
+def _process_momentum_rebalance(
+    api:            RoostooClient,
+    risk:           RiskManager,
+    strategy:       LongOnlyMomentumSignal,
+    current_prices: dict[str, float],
+    price_history:  pd.DataFrame,
+    dry_run:        bool,
+) -> pd.DataFrame:
+    """
+    Append the latest prices as a new bar, generate target weights, and
+    execute BUY / SELL orders to rebalance toward those weights.
+
+    Sells are executed before buys so that freed cash is available for buys
+    within the same rebalance cycle.
+
+    Returns the updated price_history so the caller can persist it.
+    """
+    # 1. Append new bar and trim history window
+    new_row = pd.DataFrame([current_prices], index=[pd.Timestamp.now()])
+    price_history = pd.concat([price_history, new_row]).tail(cfg.MOMENTUM_LOOKBACK_BARS)
+
+    # 2. Warmup guard — need enough bars for vol/trend EMAs to converge
+    if len(price_history) < cfg.MIN_WARMUP_BARS:
+        logger.info(
+            "[MOMENTUM] Warming up — %d / %d bars collected.",
+            len(price_history), cfg.MIN_WARMUP_BARS,
+        )
+        return price_history
+
+    # 3. Generate target weights (latest row of the weight DataFrame)
+    target_weights = strategy.generate_weights(price_history).iloc[-1]
+    active = {p: f"{w:.4f}" for p, w in target_weights.items() if w > 0}
+    logger.info("[MOMENTUM] Target weights: %s", active if active else "all cash")
+
+    # 4. Fetch current portfolio once (used for current-weight calculation)
+    portfolio = api.get_portfolio_value()
+    total_usd = portfolio.get("total_usd", 0.0)
+    if total_usd <= 0:
+        logger.warning("[MOMENTUM] Portfolio value is zero — skipping rebalance.")
+        return price_history
+
+    # 5. Compute current weights from live holdings
+    current_weights: dict[str, float] = {}
+    for pair in target_weights.index:
+        asset = pair.split("/")[0]
+        val   = portfolio.get("asset_values", {}).get(asset, {}).get("value_usd", 0.0)
+        current_weights[pair] = val / total_usd
+
+    # 6. Compute weight deltas and bucket into sells / buys
+    sells: list[tuple[str, float, float]] = []
+    buys:  list[tuple[str, float, float]] = []
+
+    for pair, target_w in target_weights.items():
+        price     = current_prices.get(pair)
+        if not price:
+            continue
+        current_w = current_weights.get(pair, 0.0)
+        delta     = target_w - current_w
+
+        if delta < -cfg.REBALANCE_THRESHOLD:
+            quantity = abs(delta) * total_usd / price
+            sells.append((pair, quantity, price))
+            logger.debug("[REBALANCE] SELL %s  delta=%.4f  qty=%.6f", pair, delta, quantity)
+        elif delta > cfg.REBALANCE_THRESHOLD:
+            quantity = delta * total_usd / price
+            buys.append((pair, quantity, price))
+            logger.debug("[REBALANCE] BUY  %s  delta=%.4f  qty=%.6f", pair, delta, quantity)
+
+    # 7. Execute sells first (frees cash), then buys
+    for pair, quantity, price in sells:
+        _execute_order(api, risk, pair, Signal.SELL, quantity, price, dry_run)
+    for pair, quantity, price in buys:
+        _execute_order(api, risk, pair, Signal.BUY, quantity, price, dry_run)
+
+    if not sells and not buys:
+        logger.info("[MOMENTUM] Portfolio already within rebalance threshold — no trades needed.")
+
+    return price_history
+
+
 # ---------------------------------------------------------------------------
 # Main loop
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    # ... (Argparse and logging setup unchanged) ...
-    from signals.long_momentum import LongOnlyMomentumSignal
-    
-    # Initialise components
-    api      = RoostooClient()
-    ema_strat = EMACrossoverStrategy(cfg.FAST_EMA_PERIOD, cfg.SLOW_EMA_PERIOD)
-    mom_strat = LongOnlyMomentumSignal(vol_span=250, target_vol=0.40) # 4H settings
-    risk     = RiskManager(api)
+    # ── Parse args ───────────────────────────────────────────────────────
+    parser = argparse.ArgumentParser(description="Roostoo Momentum Trading Bot")
+    parser.add_argument("--dry-run", action="store_true", help="Log signals without placing orders")
+    args    = parser.parse_args()
+    dry_run = args.dry_run
+
+    _signal.signal(_signal.SIGINT,  _handle_shutdown)
+    _signal.signal(_signal.SIGTERM, _handle_shutdown)
+
+    if dry_run:
+        logger.info("DRY-RUN mode enabled — no orders will be placed.")
+
+    # ── Initialise components ────────────────────────────────────────────
+    api  = RoostooClient()
+    risk = RiskManager(api)
+    strategy = LongOnlyMomentumSignal(
+        fast_span            = cfg.FAST_SPAN,
+        slow_span            = cfg.SLOW_SPAN,
+        vol_span             = cfg.VOL_SPAN,
+        z_score_threshold    = cfg.Z_SCORE_THRESHOLD,
+        top_n                = cfg.TOP_N,
+        trend_filter_span    = cfg.TREND_FILTER_SPAN,
+        target_vol           = cfg.TARGET_VOL,
+        annualization_factor = cfg.ANNUALIZATION_FACTOR,
+    )
 
     active_pairs = _validate_pairs(api, cfg.TRADING_PAIRS)
     _sync_open_orders(api, risk)
 
-    # Pre-load 4H historical data for Momentum Strategy
-    logger.info("Pre-loading 4-hour historical data...")
-    price_history = pd.DataFrame()
-    for pair in active_pairs:
-        # Assuming api.get_historical_candles is implemented in client.py
-        price_history[pair] = api.get_historical_candles(pair, interval="4h", limit=300)
+    # ── Seed price history from Binance public API ───────────────────────
+    price_history: pd.DataFrame = _seed_price_history(api, active_pairs)
 
     last_momentum_ts = 0.0
-    MOMENTUM_INTERVAL = 14400  # 4 hours in seconds
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dry-run", action="store_true", help="Log signals without trading")
-    args = parser.parse_args()
-    dry_run = args.dry_run
+    _log_portfolio(api)
 
+    # ── Main loop ────────────────────────────────────────────────────────
     cycle: int = 0
     while not _shutdown_requested:
-        cycle_start = time.monotonic()
+        cycle_start  = time.monotonic()
         current_time = time.time()
         cycle += 1
-        
-        # Fetch current market prices once per cycle for both strategies
-        current_prices = {p: api.get_price(p) for p in active_pairs if api.get_price(p)}
 
-        # 1. EMA STRATEGY (Every 10s Poll)
-        _process_ema_signals(api, risk, ema_strat, current_prices, dry_run)
+        # Fetch all prices once per cycle
+        current_prices: dict[str, float] = {
+            p: price
+            for p in active_pairs
+            if (price := api.get_price(p)) is not None
+        }
 
-        # 2. MOMENTUM STRATEGY (Every 4 Hours)
-        if current_time - last_momentum_ts >= MOMENTUM_INTERVAL:
-            logger.info("─── Executing 4-Hour Momentum Rebalance ───")
-            _process_momentum_rebalance(api, risk, mom_strat, current_prices, price_history, dry_run)
+        # 1. Stop-loss check — runs every 10s on live prices
+        for pair, price in current_prices.items():
+            if risk.check_stop_loss(pair, price):
+                _execute_stop_loss(api, risk, pair, price, dry_run)
+
+        # 2. Momentum rebalance — runs every 4 hours
+        if current_time - last_momentum_ts >= cfg.MOMENTUM_INTERVAL_SECONDS:
+            logger.info("─── 4-Hour Momentum Rebalance (cycle %d) ───", cycle)
+            price_history    = _process_momentum_rebalance(
+                api, risk, strategy, current_prices, price_history, dry_run,
+            )
             last_momentum_ts = current_time
 
-        # 3. Standard Housekeeping (Stale orders, logging, sleep)
+        # 3. Housekeeping
         _cancel_stale_orders(api, risk, dry_run)
-        if cycle % 10 == 0: _log_portfolio(api)
-        
-        # Sleep logic (unchanged)
+        if cycle % 10 == 0:
+            _log_portfolio(api)
 
         # 4. Sleep for the remainder of the polling interval
         elapsed    = time.monotonic() - cycle_start
         sleep_time = max(0.0, cfg.POLL_INTERVAL_SECONDS - elapsed)
-        logger.info(
-            "Cycle %d done in %.1fs — next poll in %.1fs.",
-            cycle, elapsed, sleep_time,
-        )
+        logger.info("Cycle %d done in %.1fs — next poll in %.1fs.", cycle, elapsed, sleep_time)
         if not _shutdown_requested and sleep_time > 0:
             time.sleep(sleep_time)
 

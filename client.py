@@ -577,17 +577,33 @@ class RoostooClient:
         # Additional cleaning/normalization can be done here based on actual order fields.
         return df
 
-    def get_historical_candles(self, pair: str, interval: str, limit: int) -> pd.DataFrame:
+    def get_binance_history(self, pair: str, interval: str = "4h", limit: int = 300) -> pd.Series:
         """
-        Fetches historical OHLCV. 
-        Assumes endpoint: GET /v3/klines?pair=BTC/USD&interval=4h&limit=300
+        Fetch historical closing prices from Binance's free public REST API (no auth required).
+        Used at startup to seed price_history so momentum signals are immediately meaningful.
+
+        Pair mapping: 'BTC/USD' → 'BTCUSDT', 'ETH/USD' → 'ETHUSDT', etc.
+        Returns a pd.Series of closing prices indexed by UTC datetime, or an empty Series on failure.
         """
-        params = {"pair": pair, "interval": interval, "limit": limit}
-        result = self._request("GET", "/v3/klines", params=params)
-        if result.get("Success"):
-            # Expecting a list of [timestamp, open, high, low, close, volume]
-            df = pd.DataFrame(result["Data"], columns=["ts", "o", "h", "l", "c", "v"])
-            df["ts"] = pd.to_datetime(df["ts"], unit='ms')
-            df.set_index("ts", inplace=True)
-            return df["c"].astype(float) # We only need closing prices
-        return pd.Series()
+        import requests as _req
+        symbol = pair.replace("/USD", "USDT").replace("/", "")
+        url    = "https://api.binance.com/api/v3/klines"
+        params = {"symbol": symbol, "interval": interval, "limit": limit}
+        try:
+            resp = _req.get(url, params=params, timeout=10)
+            resp.raise_for_status()
+            data = resp.json()
+            # Each element: [open_time, open, high, low, close, volume, ...]
+            closes = pd.Series(
+                [float(bar[4]) for bar in data],
+                index=pd.to_datetime([bar[0] for bar in data], unit="ms"),
+                name=pair,
+            )
+            logger.info(
+                "[BINANCE SEED] %s  bars=%d  latest_close=%.4f",
+                pair, len(closes), closes.iloc[-1] if len(closes) else 0,
+            )
+            return closes
+        except Exception as exc:
+            logger.warning("[BINANCE SEED] Failed for %s: %s — will fill from live prices.", pair, exc)
+            return pd.Series(name=pair, dtype=float)

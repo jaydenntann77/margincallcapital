@@ -99,3 +99,11 @@ RETRY_JITTER: float  = 0.5   # Uniform random fraction added to avoid thundering
 # ---------------------------------------------------------------------------
 LOG_FILE:  str = "bot.log"
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+
+# --- Strategy Partitioning ---
+MOMENTUM_CAPITAL_SHARE: float = 0.5  # 50% of total equity
+EMA_CAPITAL_SHARE: float      = 0.5  # 50% of total equity
+
+# --- 4-Hour Momentum Settings ---
+MOMENTUM_INTERVAL_SECONDS: int = 14400  # 4 hours (60 * 60 * 4)
+MOMENTUM_LOOKBACK_BARS: int    = 300    # Enough for 250 vol_span

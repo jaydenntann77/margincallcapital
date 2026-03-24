@@ -576,3 +576,18 @@ class RoostooClient:
         df = pd.DataFrame(orders)
         # Additional cleaning/normalization can be done here based on actual order fields.
         return df
+
+    def get_historical_candles(self, pair: str, interval: str, limit: int) -> pd.DataFrame:
+        """
+        Fetches historical OHLCV. 
+        Assumes endpoint: GET /v3/klines?pair=BTC/USD&interval=4h&limit=300
+        """
+        params = {"pair": pair, "interval": interval, "limit": limit}
+        result = self._request("GET", "/v3/klines", params=params)
+        if result.get("Success"):
+            # Expecting a list of [timestamp, open, high, low, close, volume]
+            df = pd.DataFrame(result["Data"], columns=["ts", "o", "h", "l", "c", "v"])
+            df["ts"] = pd.to_datetime(df["ts"], unit='ms')
+            df.set_index("ts", inplace=True)
+            return df["c"].astype(float) # We only need closing prices
+        return pd.Series()
